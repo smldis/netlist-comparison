@@ -1,0 +1,2089 @@
+{
+  "schema_version": 1,
+  "algorithm": "fixed_features_optional_assignment_v1",
+  "scope": {
+    "comparison": "represented_structure",
+    "top_a": "TOP",
+    "top_b": "TOP",
+    "a": {
+      "global_nets": [
+        "0"
+      ],
+      "globals_complete": false
+    },
+    "b": {
+      "global_nets": [
+        "0"
+      ],
+      "globals_complete": false
+    },
+    "net_scoping": "formal bindings, explicit globals and ground; other nets local",
+    "unavailable": [
+      "model_bodies",
+      "global_parameter_semantics",
+      "source_map",
+      "unretained_directives",
+      "nonterminal_reference_resolution"
+    ],
+    "unevaluated": [
+      "parameter_expressions",
+      "effective_defaults_and_overrides"
+    ],
+    "global_net_declarations_complete": false
+  },
+  "input_identity": {
+    "kind": "retained_canonical_data_sha256",
+    "a": "bd9d154c68ceb3310fa48c959dc874109c38ace7185e4fa569e9a8f44e0d5e2e",
+    "b": "bfcef4bebc7d389f02570b9679c9d51a9f05849904acfc89bccf0d9a8329bee3"
+  },
+  "options": {
+    "max_objects": 20000,
+    "max_depth": 32,
+    "candidate_top_k": 8,
+    "tile_size": 128,
+    "max_pair_scores": 25000000,
+    "max_component_nodes": 256,
+    "max_component_edges": 4096,
+    "max_alternative_checks": 16,
+    "unmatched_cost": 0.3,
+    "type_penalty": 0.12,
+    "ambiguity_tolerance": 1e-09
+  },
+  "a": {
+    "objects": [
+      {
+        "id": "TOP/XOLD/XCH/C1",
+        "path_segments": [
+          "TOP",
+          "XOLD",
+          "XCH",
+          "C1"
+        ],
+        "parent": "TOP/XOLD/XCH",
+        "definition": "CELL",
+        "type": "capacitor",
+        "parameters": [
+          {
+            "name": "value",
+            "value": "1p"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "p",
+            "net": "T"
+          },
+          {
+            "pin": "n",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "p": "local:TOP/XOLD/XCH:t",
+          "n": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XOLD/XCH/M1",
+        "path_segments": [
+          "TOP",
+          "XOLD",
+          "XCH",
+          "M1"
+        ],
+        "parent": "TOP/XOLD/XCH",
+        "definition": "CELL",
+        "type": "nmos",
+        "parameters": [
+          {
+            "name": "model",
+            "value": "N"
+          },
+          {
+            "name": "W",
+            "value": "W"
+          },
+          {
+            "name": "L",
+            "value": "1u"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "d",
+            "net": "OUT"
+          },
+          {
+            "pin": "g",
+            "net": "IN"
+          },
+          {
+            "pin": "s",
+            "net": "T"
+          },
+          {
+            "pin": "b",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "d": "local:TOP:out",
+          "g": "local:TOP:in",
+          "s": "local:TOP/XOLD/XCH:t",
+          "b": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XOLD/XCH/M2",
+        "path_segments": [
+          "TOP",
+          "XOLD",
+          "XCH",
+          "M2"
+        ],
+        "parent": "TOP/XOLD/XCH",
+        "definition": "CELL",
+        "type": "nmos",
+        "parameters": [
+          {
+            "name": "model",
+            "value": "N"
+          },
+          {
+            "name": "W",
+            "value": "3u"
+          },
+          {
+            "name": "L",
+            "value": "1u"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "d",
+            "net": "T"
+          },
+          {
+            "pin": "g",
+            "net": "IN"
+          },
+          {
+            "pin": "s",
+            "net": "VSS"
+          },
+          {
+            "pin": "b",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "d": "local:TOP/XOLD/XCH:t",
+          "g": "local:TOP:in",
+          "s": "global:0",
+          "b": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XOLD/XCH/R1",
+        "path_segments": [
+          "TOP",
+          "XOLD",
+          "XCH",
+          "R1"
+        ],
+        "parent": "TOP/XOLD/XCH",
+        "definition": "CELL",
+        "type": "resistor",
+        "parameters": [
+          {
+            "name": "value",
+            "value": "1k"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "p",
+            "net": "OUT"
+          },
+          {
+            "pin": "n",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "p": "local:TOP:out",
+          "n": "global:0"
+        },
+        "opaque_reason": null
+      }
+    ],
+    "occurrences": [
+      {
+        "path": "TOP",
+        "path_segments": [
+          "TOP"
+        ],
+        "parent": null,
+        "depth": 0,
+        "definition": "TOP",
+        "call_type": null,
+        "call_connections": [],
+        "overrides": [],
+        "bindings": {},
+        "leaf_count": 4
+      },
+      {
+        "path": "TOP/XOLD",
+        "path_segments": [
+          "TOP",
+          "XOLD"
+        ],
+        "parent": "TOP",
+        "depth": 1,
+        "definition": "WRAP",
+        "call_type": "WRAP",
+        "call_connections": [
+          {
+            "pin": "IN",
+            "net": "in"
+          },
+          {
+            "pin": "OUT",
+            "net": "out"
+          },
+          {
+            "pin": "G",
+            "net": "0"
+          }
+        ],
+        "overrides": [],
+        "bindings": {
+          "in": "local:TOP:in",
+          "out": "local:TOP:out",
+          "g": "global:0"
+        },
+        "leaf_count": 4
+      },
+      {
+        "path": "TOP/XOLD/XCH",
+        "path_segments": [
+          "TOP",
+          "XOLD",
+          "XCH"
+        ],
+        "parent": "TOP/XOLD",
+        "depth": 2,
+        "definition": "CELL",
+        "call_type": "CELL",
+        "call_connections": [
+          {
+            "pin": "IN",
+            "net": "IN"
+          },
+          {
+            "pin": "OUT",
+            "net": "OUT"
+          },
+          {
+            "pin": "VSS",
+            "net": "G"
+          }
+        ],
+        "overrides": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "bindings": {
+          "in": "local:TOP:in",
+          "out": "local:TOP:out",
+          "vss": "global:0"
+        },
+        "leaf_count": 4
+      }
+    ],
+    "definitions": [
+      {
+        "name": "CELL",
+        "pins": [
+          "IN",
+          "OUT",
+          "VSS"
+        ],
+        "parameter_defaults": [
+          {
+            "name": "W",
+            "value": "2u"
+          }
+        ],
+        "direct_device_count": 4
+      },
+      {
+        "name": "TOP",
+        "pins": [],
+        "parameter_defaults": [],
+        "direct_device_count": 1
+      },
+      {
+        "name": "WRAP",
+        "pins": [
+          "IN",
+          "OUT",
+          "G"
+        ],
+        "parameter_defaults": [],
+        "direct_device_count": 1
+      }
+    ],
+    "diagnostics": [],
+    "unresolved": [],
+    "expansion_complete": true,
+    "expanded_leaf_count": 4,
+    "max_depth": 2,
+    "classes": [
+      {
+        "id": "a0",
+        "members": [
+          "TOP/XOLD/XCH/C1"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "capacitor",
+            "parameters": [
+              {
+                "name": "value",
+                "value": "1p"
+              }
+            ],
+            "members": [
+              "TOP/XOLD/XCH/C1"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "a1",
+        "members": [
+          "TOP/XOLD/XCH/M1"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "nmos",
+            "parameters": [
+              {
+                "name": "model",
+                "value": "N"
+              },
+              {
+                "name": "W",
+                "value": "W"
+              },
+              {
+                "name": "L",
+                "value": "1u"
+              }
+            ],
+            "members": [
+              "TOP/XOLD/XCH/M1"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "a2",
+        "members": [
+          "TOP/XOLD/XCH/M2"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "nmos",
+            "parameters": [
+              {
+                "name": "model",
+                "value": "N"
+              },
+              {
+                "name": "W",
+                "value": "3u"
+              },
+              {
+                "name": "L",
+                "value": "1u"
+              }
+            ],
+            "members": [
+              "TOP/XOLD/XCH/M2"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "a3",
+        "members": [
+          "TOP/XOLD/XCH/R1"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "resistor",
+            "parameters": [
+              {
+                "name": "value",
+                "value": "1k"
+              }
+            ],
+            "members": [
+              "TOP/XOLD/XCH/R1"
+            ],
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "disposition": [
+      {
+        "object": "TOP/XOLD/XCH/C1",
+        "status": "tentative",
+        "group": "g0",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XOLD/XCH/M1",
+        "status": "tentative",
+        "group": "g1",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XOLD/XCH/M2",
+        "status": "tentative",
+        "group": "g1",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XOLD/XCH/R1",
+        "status": "tentative",
+        "group": "g0",
+        "reason": "see_group"
+      }
+    ],
+    "coverage": {
+      "tentative": 4,
+      "ambiguous": 0,
+      "unresolved": 0,
+      "unpaired": 0,
+      "opaque": 0
+    }
+  },
+  "b": {
+    "objects": [
+      {
+        "id": "TOP/XMOVED/XCORE/XNEW/C9",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE",
+          "XNEW",
+          "C9"
+        ],
+        "parent": "TOP/XMOVED/XCORE/XNEW",
+        "definition": "RENAMED",
+        "type": "capacitor",
+        "parameters": [
+          {
+            "name": "value",
+            "value": "1p"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "p",
+            "net": "T"
+          },
+          {
+            "pin": "n",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "p": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "n": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XMOVED/XCORE/XNEW/M8",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE",
+          "XNEW",
+          "M8"
+        ],
+        "parent": "TOP/XMOVED/XCORE/XNEW",
+        "definition": "RENAMED",
+        "type": "nmos",
+        "parameters": [
+          {
+            "name": "model",
+            "value": "N"
+          },
+          {
+            "name": "W",
+            "value": "6u"
+          },
+          {
+            "name": "L",
+            "value": "1u"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "d",
+            "net": "OUT"
+          },
+          {
+            "pin": "g",
+            "net": "IN"
+          },
+          {
+            "pin": "s",
+            "net": "T"
+          },
+          {
+            "pin": "b",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "d": "local:TOP:out",
+          "g": "local:TOP:in",
+          "s": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "b": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XMOVED/XCORE/XNEW/M9",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE",
+          "XNEW",
+          "M9"
+        ],
+        "parent": "TOP/XMOVED/XCORE/XNEW",
+        "definition": "RENAMED",
+        "type": "nmos",
+        "parameters": [
+          {
+            "name": "model",
+            "value": "N"
+          },
+          {
+            "name": "W",
+            "value": "3u"
+          },
+          {
+            "name": "L",
+            "value": "1u"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "d",
+            "net": "T"
+          },
+          {
+            "pin": "g",
+            "net": "IN"
+          },
+          {
+            "pin": "s",
+            "net": "VSS"
+          },
+          {
+            "pin": "b",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "d": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "g": "local:TOP:in",
+          "s": "global:0",
+          "b": "global:0"
+        },
+        "opaque_reason": null
+      },
+      {
+        "id": "TOP/XMOVED/XCORE/XNEW/R9",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE",
+          "XNEW",
+          "R9"
+        ],
+        "parent": "TOP/XMOVED/XCORE/XNEW",
+        "definition": "RENAMED",
+        "type": "resistor",
+        "parameters": [
+          {
+            "name": "value",
+            "value": "1k"
+          }
+        ],
+        "connections": [
+          {
+            "pin": "p",
+            "net": "OUT"
+          },
+          {
+            "pin": "n",
+            "net": "VSS"
+          }
+        ],
+        "resolved_nets": {
+          "p": "local:TOP:out",
+          "n": "global:0"
+        },
+        "opaque_reason": null
+      }
+    ],
+    "occurrences": [
+      {
+        "path": "TOP",
+        "path_segments": [
+          "TOP"
+        ],
+        "parent": null,
+        "depth": 0,
+        "definition": "TOP",
+        "call_type": null,
+        "call_connections": [],
+        "overrides": [],
+        "bindings": {},
+        "leaf_count": 4
+      },
+      {
+        "path": "TOP/XMOVED",
+        "path_segments": [
+          "TOP",
+          "XMOVED"
+        ],
+        "parent": "TOP",
+        "depth": 1,
+        "definition": "WRAP",
+        "call_type": "WRAP",
+        "call_connections": [
+          {
+            "pin": "IN",
+            "net": "in"
+          },
+          {
+            "pin": "OUT",
+            "net": "out"
+          },
+          {
+            "pin": "G",
+            "net": "0"
+          }
+        ],
+        "overrides": [],
+        "bindings": {
+          "in": "local:TOP:in",
+          "out": "local:TOP:out",
+          "g": "global:0"
+        },
+        "leaf_count": 4
+      },
+      {
+        "path": "TOP/XMOVED/XCORE",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE"
+        ],
+        "parent": "TOP/XMOVED",
+        "depth": 2,
+        "definition": "INNER",
+        "call_type": "INNER",
+        "call_connections": [
+          {
+            "pin": "IN",
+            "net": "IN"
+          },
+          {
+            "pin": "OUT",
+            "net": "OUT"
+          },
+          {
+            "pin": "G",
+            "net": "G"
+          }
+        ],
+        "overrides": [],
+        "bindings": {
+          "in": "local:TOP:in",
+          "out": "local:TOP:out",
+          "g": "global:0"
+        },
+        "leaf_count": 4
+      },
+      {
+        "path": "TOP/XMOVED/XCORE/XNEW",
+        "path_segments": [
+          "TOP",
+          "XMOVED",
+          "XCORE",
+          "XNEW"
+        ],
+        "parent": "TOP/XMOVED/XCORE",
+        "depth": 3,
+        "definition": "RENAMED",
+        "call_type": "RENAMED",
+        "call_connections": [
+          {
+            "pin": "IN",
+            "net": "IN"
+          },
+          {
+            "pin": "OUT",
+            "net": "OUT"
+          },
+          {
+            "pin": "VSS",
+            "net": "G"
+          }
+        ],
+        "overrides": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "bindings": {
+          "in": "local:TOP:in",
+          "out": "local:TOP:out",
+          "vss": "global:0"
+        },
+        "leaf_count": 4
+      }
+    ],
+    "definitions": [
+      {
+        "name": "INNER",
+        "pins": [
+          "IN",
+          "OUT",
+          "G"
+        ],
+        "parameter_defaults": [],
+        "direct_device_count": 1
+      },
+      {
+        "name": "RENAMED",
+        "pins": [
+          "IN",
+          "OUT",
+          "VSS"
+        ],
+        "parameter_defaults": [
+          {
+            "name": "W",
+            "value": "5u"
+          }
+        ],
+        "direct_device_count": 4
+      },
+      {
+        "name": "TOP",
+        "pins": [],
+        "parameter_defaults": [],
+        "direct_device_count": 1
+      },
+      {
+        "name": "WRAP",
+        "pins": [
+          "IN",
+          "OUT",
+          "G"
+        ],
+        "parameter_defaults": [],
+        "direct_device_count": 1
+      }
+    ],
+    "diagnostics": [],
+    "unresolved": [],
+    "expansion_complete": true,
+    "expanded_leaf_count": 4,
+    "max_depth": 3,
+    "classes": [
+      {
+        "id": "b0",
+        "members": [
+          "TOP/XMOVED/XCORE/XNEW/C9"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "capacitor",
+            "parameters": [
+              {
+                "name": "value",
+                "value": "1p"
+              }
+            ],
+            "members": [
+              "TOP/XMOVED/XCORE/XNEW/C9"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "b1",
+        "members": [
+          "TOP/XMOVED/XCORE/XNEW/M8"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "nmos",
+            "parameters": [
+              {
+                "name": "model",
+                "value": "N"
+              },
+              {
+                "name": "W",
+                "value": "6u"
+              },
+              {
+                "name": "L",
+                "value": "1u"
+              }
+            ],
+            "members": [
+              "TOP/XMOVED/XCORE/XNEW/M8"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "b2",
+        "members": [
+          "TOP/XMOVED/XCORE/XNEW/M9"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "nmos",
+            "parameters": [
+              {
+                "name": "model",
+                "value": "N"
+              },
+              {
+                "name": "W",
+                "value": "3u"
+              },
+              {
+                "name": "L",
+                "value": "1u"
+              }
+            ],
+            "members": [
+              "TOP/XMOVED/XCORE/XNEW/M9"
+            ],
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "b3",
+        "members": [
+          "TOP/XMOVED/XCORE/XNEW/R9"
+        ],
+        "structural_support": true,
+        "examined_classes": 4,
+        "available_classes": 4,
+        "search_complete": true,
+        "top_k_truncated": false,
+        "cutoff_tie": false,
+        "raw_profiles": [
+          {
+            "type": "resistor",
+            "parameters": [
+              {
+                "name": "value",
+                "value": "1k"
+              }
+            ],
+            "members": [
+              "TOP/XMOVED/XCORE/XNEW/R9"
+            ],
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "disposition": [
+      {
+        "object": "TOP/XMOVED/XCORE/XNEW/C9",
+        "status": "tentative",
+        "group": "g0",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XMOVED/XCORE/XNEW/M8",
+        "status": "tentative",
+        "group": "g1",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XMOVED/XCORE/XNEW/M9",
+        "status": "tentative",
+        "group": "g1",
+        "reason": "see_group"
+      },
+      {
+        "object": "TOP/XMOVED/XCORE/XNEW/R9",
+        "status": "tentative",
+        "group": "g0",
+        "reason": "see_group"
+      }
+    ],
+    "coverage": {
+      "tentative": 4,
+      "ambiguous": 0,
+      "unresolved": 0,
+      "unpaired": 0,
+      "opaque": 0
+    }
+  },
+  "candidate_edges": [
+    {
+      "a_class": "a0",
+      "b_class": "b0",
+      "cost": 0.0,
+      "eligible": true
+    },
+    {
+      "a_class": "a0",
+      "b_class": "b1",
+      "cost": 1.8338685642618548,
+      "eligible": false
+    },
+    {
+      "a_class": "a0",
+      "b_class": "b2",
+      "cost": 1.8524043689652179,
+      "eligible": false
+    },
+    {
+      "a_class": "a0",
+      "b_class": "b3",
+      "cost": 0.19867581420278108,
+      "eligible": true
+    },
+    {
+      "a_class": "a1",
+      "b_class": "b0",
+      "cost": 1.8338685642618548,
+      "eligible": false
+    },
+    {
+      "a_class": "a1",
+      "b_class": "b1",
+      "cost": 0.0,
+      "eligible": true
+    },
+    {
+      "a_class": "a1",
+      "b_class": "b2",
+      "cost": 0.30809342926071,
+      "eligible": true
+    },
+    {
+      "a_class": "a1",
+      "b_class": "b3",
+      "cost": 1.861737672724201,
+      "eligible": false
+    },
+    {
+      "a_class": "a2",
+      "b_class": "b0",
+      "cost": 1.8524043689652179,
+      "eligible": false
+    },
+    {
+      "a_class": "a2",
+      "b_class": "b1",
+      "cost": 0.30809342926071,
+      "eligible": true
+    },
+    {
+      "a_class": "a2",
+      "b_class": "b2",
+      "cost": 0.0,
+      "eligible": true
+    },
+    {
+      "a_class": "a2",
+      "b_class": "b3",
+      "cost": 1.880273477427564,
+      "eligible": false
+    },
+    {
+      "a_class": "a3",
+      "b_class": "b0",
+      "cost": 0.19867581420278108,
+      "eligible": true
+    },
+    {
+      "a_class": "a3",
+      "b_class": "b1",
+      "cost": 1.861737672724201,
+      "eligible": false
+    },
+    {
+      "a_class": "a3",
+      "b_class": "b2",
+      "cost": 1.880273477427564,
+      "eligible": false
+    },
+    {
+      "a_class": "a3",
+      "b_class": "b3",
+      "cost": 0.0,
+      "eligible": true
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "a_classes": [
+        "a0",
+        "a3"
+      ],
+      "b_classes": [
+        "b0",
+        "b3"
+      ],
+      "relation": null,
+      "constraint": "one_to_one_leaf_pairs",
+      "hypotheses": [
+        [
+          "p0",
+          "p1"
+        ]
+      ],
+      "alternatives_complete": false,
+      "assignment_domain": {
+        "a_classes": [
+          "a0",
+          "a3"
+        ],
+        "b_classes": [
+          "b0",
+          "b3"
+        ],
+        "excluded": [],
+        "meaning": "restricted singleton proposal; other class alternatives remain unresolved"
+      },
+      "status": "tentative",
+      "reasons": [],
+      "objective": 0.0,
+      "selected_edge_checks": 2,
+      "selected_edges_checked": true,
+      "candidate_truncated": false
+    },
+    {
+      "id": "g1",
+      "a_classes": [
+        "a1",
+        "a2"
+      ],
+      "b_classes": [
+        "b1",
+        "b2"
+      ],
+      "relation": null,
+      "constraint": "one_to_one_leaf_pairs",
+      "hypotheses": [
+        [
+          "p2",
+          "p3"
+        ]
+      ],
+      "alternatives_complete": false,
+      "assignment_domain": {
+        "a_classes": [
+          "a1",
+          "a2"
+        ],
+        "b_classes": [
+          "b1",
+          "b2"
+        ],
+        "excluded": [],
+        "meaning": "restricted singleton proposal; other class alternatives remain unresolved"
+      },
+      "status": "tentative",
+      "reasons": [],
+      "objective": 0.0,
+      "selected_edge_checks": 2,
+      "selected_edges_checked": true,
+      "candidate_truncated": false
+    }
+  ],
+  "pair_options": [
+    {
+      "id": "p0",
+      "group": "g0",
+      "a": "TOP/XOLD/XCH/C1",
+      "b": "TOP/XMOVED/XCORE/XNEW/C9",
+      "status": "representative",
+      "cost": 0.0,
+      "raw_differences": [],
+      "terminals": [
+        {
+          "role": "n",
+          "role_a": "n",
+          "role_b": "n",
+          "raw_a": "VSS",
+          "raw_b": "VSS",
+          "net_a": "global:0",
+          "net_b": "global:0",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "p",
+          "role_a": "p",
+          "role_b": "p",
+          "raw_a": "T",
+          "raw_b": "T",
+          "net_a": "local:TOP/XOLD/XCH:t",
+          "net_b": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": true
+        }
+      ],
+      "correspondence": "tentative",
+      "evidence": {
+        "structure_cost": 0.0,
+        "type_equal": true,
+        "external_neighbors_on_both_sides": true,
+        "raw_attributes_used_for_scoring": false
+      }
+    },
+    {
+      "id": "p1",
+      "group": "g0",
+      "a": "TOP/XOLD/XCH/R1",
+      "b": "TOP/XMOVED/XCORE/XNEW/R9",
+      "status": "representative",
+      "cost": 0.0,
+      "raw_differences": [],
+      "terminals": [
+        {
+          "role": "n",
+          "role_a": "n",
+          "role_b": "n",
+          "raw_a": "VSS",
+          "raw_b": "VSS",
+          "net_a": "global:0",
+          "net_b": "global:0",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "p",
+          "role_a": "p",
+          "role_b": "p",
+          "raw_a": "OUT",
+          "raw_b": "OUT",
+          "net_a": "local:TOP:out",
+          "net_b": "local:TOP:out",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        }
+      ],
+      "correspondence": "tentative",
+      "evidence": {
+        "structure_cost": 0.0,
+        "type_equal": true,
+        "external_neighbors_on_both_sides": true,
+        "raw_attributes_used_for_scoring": false
+      }
+    },
+    {
+      "id": "p2",
+      "group": "g1",
+      "a": "TOP/XOLD/XCH/M1",
+      "b": "TOP/XMOVED/XCORE/XNEW/M8",
+      "status": "representative",
+      "cost": 0.0,
+      "raw_differences": [
+        {
+          "field": "parameters.W",
+          "a": [
+            "W"
+          ],
+          "b": [
+            "6u"
+          ]
+        }
+      ],
+      "terminals": [
+        {
+          "role": "b",
+          "role_a": "b",
+          "role_b": "b",
+          "raw_a": "VSS",
+          "raw_b": "VSS",
+          "net_a": "global:0",
+          "net_b": "global:0",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "d",
+          "role_a": "d",
+          "role_b": "d",
+          "raw_a": "OUT",
+          "raw_b": "OUT",
+          "net_a": "local:TOP:out",
+          "net_b": "local:TOP:out",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "g",
+          "role_a": "g",
+          "role_b": "g",
+          "raw_a": "IN",
+          "raw_b": "IN",
+          "net_a": "local:TOP:in",
+          "net_b": "local:TOP:in",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "s",
+          "role_a": "s",
+          "role_b": "s",
+          "raw_a": "T",
+          "raw_b": "T",
+          "net_a": "local:TOP/XOLD/XCH:t",
+          "net_b": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": true
+        }
+      ],
+      "correspondence": "tentative",
+      "evidence": {
+        "structure_cost": 0.0,
+        "type_equal": true,
+        "external_neighbors_on_both_sides": true,
+        "raw_attributes_used_for_scoring": false
+      }
+    },
+    {
+      "id": "p3",
+      "group": "g1",
+      "a": "TOP/XOLD/XCH/M2",
+      "b": "TOP/XMOVED/XCORE/XNEW/M9",
+      "status": "representative",
+      "cost": 0.0,
+      "raw_differences": [],
+      "terminals": [
+        {
+          "role": "b",
+          "role_a": "b",
+          "role_b": "b",
+          "raw_a": "VSS",
+          "raw_b": "VSS",
+          "net_a": "global:0",
+          "net_b": "global:0",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "d",
+          "role_a": "d",
+          "role_b": "d",
+          "raw_a": "T",
+          "raw_b": "T",
+          "net_a": "local:TOP/XOLD/XCH:t",
+          "net_b": "local:TOP/XMOVED/XCORE/XNEW:t",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": true
+        },
+        {
+          "role": "g",
+          "role_a": "g",
+          "role_b": "g",
+          "raw_a": "IN",
+          "raw_b": "IN",
+          "net_a": "local:TOP:in",
+          "net_b": "local:TOP:in",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        },
+        {
+          "role": "s",
+          "role_a": "s",
+          "role_b": "s",
+          "raw_a": "VSS",
+          "raw_b": "VSS",
+          "net_a": "global:0",
+          "net_b": "global:0",
+          "paired": true,
+          "raw_binding_differs": false,
+          "resolved_identifier_differs": false
+        }
+      ],
+      "correspondence": "tentative",
+      "evidence": {
+        "structure_cost": 0.0,
+        "type_equal": true,
+        "external_neighbors_on_both_sides": true,
+        "raw_attributes_used_for_scoring": false
+      }
+    }
+  ],
+  "representative_pair_ids": [
+    "p0",
+    "p1",
+    "p2",
+    "p3"
+  ],
+  "connectivity": {
+    "conditional_on_pair_ids": [
+      "p0",
+      "p1",
+      "p2",
+      "p3"
+    ],
+    "meaning": "net partitions of paired endpoints under declared scoping; not net identity",
+    "overlap": [
+      {
+        "a": "global:0",
+        "b": "global:0",
+        "endpoint_tokens": [
+          "p0:n",
+          "p1:n",
+          "p2:b",
+          "p3:b",
+          "p3:s"
+        ],
+        "a_partitioned_across_b": false,
+        "b_collects_multiple_a": false,
+        "single_endpoint_only": false
+      },
+      {
+        "a": "local:TOP/XOLD/XCH:t",
+        "b": "local:TOP/XMOVED/XCORE/XNEW:t",
+        "endpoint_tokens": [
+          "p0:p",
+          "p2:s",
+          "p3:d"
+        ],
+        "a_partitioned_across_b": false,
+        "b_collects_multiple_a": false,
+        "single_endpoint_only": false
+      },
+      {
+        "a": "local:TOP:in",
+        "b": "local:TOP:in",
+        "endpoint_tokens": [
+          "p2:g",
+          "p3:g"
+        ],
+        "a_partitioned_across_b": false,
+        "b_collects_multiple_a": false,
+        "single_endpoint_only": false
+      },
+      {
+        "a": "local:TOP:out",
+        "b": "local:TOP:out",
+        "endpoint_tokens": [
+          "p1:p",
+          "p2:d"
+        ],
+        "a_partitioned_across_b": false,
+        "b_collects_multiple_a": false,
+        "single_endpoint_only": false
+      }
+    ],
+    "unpaired_endpoints_a": [],
+    "unpaired_endpoints_b": []
+  },
+  "hierarchy": {
+    "conditional_on_pair_ids": [
+      "p0",
+      "p1",
+      "p2",
+      "p3"
+    ],
+    "memberships": [
+      {
+        "a": "TOP",
+        "b": "TOP",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 0,
+        "depth_b": 0,
+        "relation": null
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 0,
+        "depth_b": 1,
+        "relation": null
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED/XCORE",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 0,
+        "depth_b": 2,
+        "relation": null
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 0,
+        "depth_b": 3,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 1,
+        "depth_b": 0,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 1,
+        "depth_b": 1,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED/XCORE",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 1,
+        "depth_b": 2,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 1,
+        "depth_b": 3,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 2,
+        "depth_b": 0,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 2,
+        "depth_b": 1,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED/XCORE",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 2,
+        "depth_b": 2,
+        "relation": null
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "paired_leaves": 4,
+        "total_a": 4,
+        "total_b": 4,
+        "depth_a": 2,
+        "depth_b": 3,
+        "relation": null
+      }
+    ],
+    "occurrence_options": [
+      {
+        "a": "TOP",
+        "b": "TOP",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED/XCORE",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_differ": true
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED/XCORE",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [],
+        "overrides_differ": false
+      },
+      {
+        "a": "TOP/XOLD",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [],
+        "overrides_b": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_differ": true
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_b": [],
+        "overrides_differ": true
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_b": [],
+        "overrides_differ": true
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED/XCORE",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_b": [],
+        "overrides_differ": true
+      },
+      {
+        "a": "TOP/XOLD/XCH",
+        "b": "TOP/XMOVED/XCORE/XNEW",
+        "relation": null,
+        "basis": "mutual_maximum_leaf_membership",
+        "overrides_a": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_b": [
+          {
+            "name": "W",
+            "value": "4u"
+          }
+        ],
+        "overrides_differ": false
+      }
+    ],
+    "definition_options": [
+      {
+        "a": "CELL",
+        "b": "INNER",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": [
+              "2u"
+            ],
+            "b": null
+          },
+          {
+            "field": "defaults.$order",
+            "a": [
+              "W"
+            ],
+            "b": []
+          },
+          {
+            "field": "pins",
+            "a": [
+              "IN",
+              "OUT",
+              "VSS"
+            ],
+            "b": [
+              "IN",
+              "OUT",
+              "G"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD/XCH"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE"
+        ]
+      },
+      {
+        "a": "CELL",
+        "b": "RENAMED",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": [
+              "2u"
+            ],
+            "b": [
+              "5u"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD/XCH"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE/XNEW"
+        ]
+      },
+      {
+        "a": "CELL",
+        "b": "TOP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": [
+              "2u"
+            ],
+            "b": null
+          },
+          {
+            "field": "defaults.$order",
+            "a": [
+              "W"
+            ],
+            "b": []
+          },
+          {
+            "field": "pins",
+            "a": [
+              "IN",
+              "OUT",
+              "VSS"
+            ],
+            "b": []
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD/XCH"
+        ],
+        "occurrences_b": [
+          "TOP"
+        ]
+      },
+      {
+        "a": "CELL",
+        "b": "WRAP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": [
+              "2u"
+            ],
+            "b": null
+          },
+          {
+            "field": "defaults.$order",
+            "a": [
+              "W"
+            ],
+            "b": []
+          },
+          {
+            "field": "pins",
+            "a": [
+              "IN",
+              "OUT",
+              "VSS"
+            ],
+            "b": [
+              "IN",
+              "OUT",
+              "G"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD/XCH"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED"
+        ]
+      },
+      {
+        "a": "TOP",
+        "b": "INNER",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "pins",
+            "a": [],
+            "b": [
+              "IN",
+              "OUT",
+              "G"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE"
+        ]
+      },
+      {
+        "a": "TOP",
+        "b": "RENAMED",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": null,
+            "b": [
+              "5u"
+            ]
+          },
+          {
+            "field": "defaults.$order",
+            "a": [],
+            "b": [
+              "W"
+            ]
+          },
+          {
+            "field": "pins",
+            "a": [],
+            "b": [
+              "IN",
+              "OUT",
+              "VSS"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE/XNEW"
+        ]
+      },
+      {
+        "a": "TOP",
+        "b": "TOP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [],
+        "occurrences_a": [
+          "TOP"
+        ],
+        "occurrences_b": [
+          "TOP"
+        ]
+      },
+      {
+        "a": "TOP",
+        "b": "WRAP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "pins",
+            "a": [],
+            "b": [
+              "IN",
+              "OUT",
+              "G"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED"
+        ]
+      },
+      {
+        "a": "WRAP",
+        "b": "INNER",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [],
+        "occurrences_a": [
+          "TOP/XOLD"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE"
+        ]
+      },
+      {
+        "a": "WRAP",
+        "b": "RENAMED",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "defaults.W",
+            "a": null,
+            "b": [
+              "5u"
+            ]
+          },
+          {
+            "field": "defaults.$order",
+            "a": [],
+            "b": [
+              "W"
+            ]
+          },
+          {
+            "field": "pins",
+            "a": [
+              "IN",
+              "OUT",
+              "G"
+            ],
+            "b": [
+              "IN",
+              "OUT",
+              "VSS"
+            ]
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED/XCORE/XNEW"
+        ]
+      },
+      {
+        "a": "WRAP",
+        "b": "TOP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [
+          {
+            "field": "pins",
+            "a": [
+              "IN",
+              "OUT",
+              "G"
+            ],
+            "b": []
+          }
+        ],
+        "occurrences_a": [
+          "TOP/XOLD"
+        ],
+        "occurrences_b": [
+          "TOP"
+        ]
+      },
+      {
+        "a": "WRAP",
+        "b": "WRAP",
+        "basis": "tentative_occurrence_membership",
+        "raw_differences": [],
+        "occurrences_a": [
+          "TOP/XOLD"
+        ],
+        "occurrences_b": [
+          "TOP/XMOVED"
+        ]
+      }
+    ]
+  },
+  "metrics": {
+    "class_pair_scores": 16,
+    "possible_class_pairs": 16,
+    "screening_complete": true,
+    "retained_class_edges": 16,
+    "assignment_calls": 2,
+    "alternative_calls": 4,
+    "seconds": {
+      "expand": 0.0007282709702849388,
+      "features": 0.0014766678214073181,
+      "search": 0.0006658651400357485,
+      "assignment": 0.003934704000130296,
+      "report": 0.0011177449487149715
+    }
+  }
+}

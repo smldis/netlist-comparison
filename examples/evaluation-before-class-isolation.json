@@ -1,0 +1,199 @@
+{
+  "date_utc": "2026-09-15T22:03:16.205934+00:00",
+  "python": "3.11.16",
+  "numpy": "2.4.6",
+  "scipy": "1.17.1",
+  "platform": "Linux-7.1.8-arch1-3-x86_64-with-glibc2.44",
+  "options": {
+    "max_objects": 20000,
+    "max_depth": 32,
+    "candidate_top_k": 8,
+    "tile_size": 128,
+    "max_pair_scores": 25000000,
+    "max_component_nodes": 256,
+    "max_component_edges": 4096,
+    "max_alternative_checks": 16,
+    "unmatched_cost": 0.3,
+    "type_penalty": 0.12,
+    "ambiguity_tolerance": 1e-09
+  },
+  "limits": [
+    "No simulator or electrical validation",
+    "No representative workplace design",
+    "Synthetic stress history is not unique truth under symmetry",
+    "Frozen-context extension not implemented or compared",
+    "Peak RSS includes interpreter and imported libraries"
+  ],
+  "small": {
+    "leaves": {
+      "a": 4,
+      "b": 4
+    },
+    "depth": {
+      "a": 2,
+      "b": 3
+    },
+    "coverage": {
+      "a": {
+        "tentative": 4,
+        "ambiguous": 0,
+        "unresolved": 0,
+        "unpaired": 0,
+        "opaque": 0
+      },
+      "b": {
+        "tentative": 4,
+        "ambiguous": 0,
+        "unresolved": 0,
+        "unpaired": 0,
+        "opaque": 0
+      }
+    },
+    "feature_classes": {
+      "a": 4,
+      "b": 4
+    },
+    "group_count": 2,
+    "representative_pairs": 4,
+    "pairs_with_raw_differences": 1,
+    "metrics": {
+      "class_pair_scores": 16,
+      "possible_class_pairs": 16,
+      "screening_complete": true,
+      "retained_class_edges": 16,
+      "assignment_calls": 2,
+      "alternative_calls": 4,
+      "seconds": {
+        "expand": 0.0008062561973929405,
+        "features": 0.001677786000072956,
+        "search": 0.0019085928797721863,
+        "assignment": 0.0047616970259696245,
+        "report": 0.0017992770299315453
+      }
+    }
+  },
+  "stress": {
+    "leaves": {
+      "a": 2067,
+      "b": 2067
+    },
+    "depth": {
+      "a": 4,
+      "b": 5
+    },
+    "coverage": {
+      "a": {
+        "tentative": 0,
+        "ambiguous": 0,
+        "unresolved": 2067,
+        "unpaired": 0,
+        "opaque": 0
+      },
+      "b": {
+        "tentative": 0,
+        "ambiguous": 0,
+        "unresolved": 2067,
+        "unpaired": 0,
+        "opaque": 0
+      }
+    },
+    "feature_classes": {
+      "a": 24,
+      "b": 24
+    },
+    "group_count": 2,
+    "representative_pairs": 0,
+    "pairs_with_raw_differences": 0,
+    "metrics": {
+      "class_pair_scores": 576,
+      "possible_class_pairs": 576,
+      "screening_complete": true,
+      "retained_class_edges": 222,
+      "assignment_calls": 0,
+      "alternative_calls": 0,
+      "seconds": {
+        "expand": 0.2711932200472802,
+        "features": 0.30155038507655263,
+        "search": 0.0012365549337118864,
+        "assignment": 0.0013754800893366337,
+        "report": 0.13343410193920135
+      }
+    },
+    "ledger_check": {
+      "scope": "Generator history, NOT a unique admissible mapping for repeated circuits",
+      "retained_counterparts": 2067,
+      "eligible_counterparts": 2067,
+      "ledger_pairs": 2067,
+      "selected_agree_with_ledger": 0,
+      "path_name_baseline_pairs": 0
+    },
+    "edited_occurrence": {
+      "a": "TOP/XB0/XL/XL/XL/M1",
+      "b": "TOP_v2/XzB0/XPLACED/XzL/XzL/XzL/Mz1",
+      "new_value_profile_members": 1,
+      "candidate_retained": true,
+      "group_sizes_a_b": [
+        [
+          704,
+          704
+        ]
+      ]
+    },
+    "wall_seconds": 0.7125362139195204,
+    "description": "Synthetic analog motifs, populated branching hierarchy, connected banks; rename/reorder plus moved specialized leaf edit"
+  },
+  "public": {
+    "filename": "tia_output.net",
+    "sha256": "142c6445f666fa1e28f56ebb9aafcae35418b48ce1cab17ef3454ff7b1c2c7d0",
+    "diagnostics": 0,
+    "edited_definition": "TOP",
+    "edited_device": "R112",
+    "leaves": {
+      "a": 376,
+      "b": 376
+    },
+    "depth": {
+      "a": 1,
+      "b": 1
+    },
+    "coverage": {
+      "a": {
+        "tentative": 0,
+        "ambiguous": 0,
+        "unresolved": 376,
+        "unpaired": 0,
+        "opaque": 0
+      },
+      "b": {
+        "tentative": 0,
+        "ambiguous": 0,
+        "unresolved": 376,
+        "unpaired": 0,
+        "opaque": 0
+      }
+    },
+    "feature_classes": {
+      "a": 195,
+      "b": 195
+    },
+    "group_count": 4,
+    "representative_pairs": 0,
+    "pairs_with_raw_differences": 0,
+    "metrics": {
+      "class_pair_scores": 38025,
+      "possible_class_pairs": 38025,
+      "screening_complete": true,
+      "retained_class_edges": 1943,
+      "assignment_calls": 0,
+      "alternative_calls": 0,
+      "seconds": {
+        "expand": 0.014019549824297428,
+        "features": 0.057999138021841645,
+        "search": 0.023232150124385953,
+        "assignment": 0.03859256487339735,
+        "report": 0.047611091984435916
+      }
+    }
+  },
+  "peak_process_rss_kib_linux": 94244
+}
