@@ -27,7 +27,8 @@ not establish workplace accuracy or inspection benefit.
   search truncation and assignment limits visible, including when nothing matched.
 - Compare connectivity only conditional on an explicit endpoint correspondence;
   retain high-degree nets and body terminals in the report.
-- Provide a Python API and headless JSON CLI; compact data is the primary output.
+- Provide a Python API and headless CLI with complete JSON evidence and bounded,
+  deterministic terminal previews. Compact data remains the primary artifact.
 
 ## Boundaries and possibilities
 
@@ -246,3 +247,17 @@ Unknown semantics, missing files and intentionally opaque libraries are distinct
 These controls establish useful partial inspection on public synthetic inputs,
 not broad dialect compatibility or simulated electrical equivalence. Prototype
 maturity is unchanged.
+
+## CLI discovery and presentation
+
+User experience exposed a boundary gap: requiring code/docs to discover circuit
+names, actual call paths and output semantics made the headless entry point hard
+to use independently. The CLI now owns a built-in guide, bounded read-only
+inspection, explicit recovery hints and readable terminal previews. This is
+presentation of existing evidence, not inferred functional prose or a new matcher.
+Populated file-level roots and sole definitions can be selected automatically;
+ambiguous library scope requires a choice. Piped output stays JSON and callers can
+force a format; saved output always retains full evidence. Diagnostics, opacity,
+search limits and ambiguity remain visible in previews. Defaults/overrides and
+coupled hierarchy/pin details still require the full report. The fixed default,
+API contract and prototype maturity are unchanged.
