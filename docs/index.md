@@ -11,6 +11,36 @@ It does not recover edit history, prove equivalence or infer electrical effects.
 Evaluation and limitations <evaluation>
 ```
 
+## Start without reading a manual
+
+Run `netlist-compare` for a quick-start guide, or `netlist-compare --help` for
+examples, option explanations and defaults.
+
+```bash
+netlist-compare design.sp --inspect
+netlist-compare before.sp after.sp --output result.json
+netlist-compare full.sp --path-a TOP/X1 --path-b TOP/X2
+```
+
+Inspection lists circuit names, pins, actual block paths and input problems.
+Comparison selects populated file-level `TOP`, or the sole definition when the
+file level is empty. Multiple definitions require an explicit choice; the error
+lists available names. Use `--top-a`/`--top-b` for two files or `--top` for two calls.
+
+An attached terminal shows a readable preview with schematic paths, raw changes,
+coverage, input diagnostics and uncertainty. Pipes retain full JSON; `--text` or
+`--json` selects either form explicitly. `--output` always saves full JSON, with
+an abbreviated preview on stderr when stdout is redirected (suppressed by `--json`).
+`--limit N` controls displayed rows only. Text is a preview, not complete evidence:
+defaults, call overrides, hierarchy and pin details remain in JSON. Matching
+remains `fixed` by default; `--matching-mode regional` opts into the experimental
+hierarchy/regrouping matcher. No interactive prompts are required.
+
+Exit 0 means completion, possibly partial; exit 2 means invalid usage/input or I/O.
+No equality/difference exit-code convention or new matching semantics is introduced.
+`--inspect` expands under the same object/depth budgets as comparison, without
+matching. Explicit top selection still accepts an empty root.
+
 ## Start with the example
 
 From the ASS root, after `uv sync --group dev`:
