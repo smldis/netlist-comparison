@@ -45,8 +45,9 @@ netlist-compare examples/before.sp examples/after.sp --top-a TOP --top-b TOP \
   --output comparison.json
 ```
 
-The pinned canonical revision adds the reviewed ambiguous-BJT correction; its PR
-is separate from this package. Older canonical revisions can supply guessed BJT
+The pinned canonical revision adds the reviewed ambiguous-BJT correction in
+[canonical PR #2](https://github.com/smldis/spice-canonical/pull/2).
+Older canonical revisions can supply guessed BJT
 terminals and will fail those regression tests. NumPy and SciPy are declared
 runtime dependencies. No simulator or private netlist is required for the tests.
 The full ASS validation passed 196 canonical, comparator and integration tests.

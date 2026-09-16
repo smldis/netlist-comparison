@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -134,7 +135,7 @@ X2 c d 0 CELL
 def test_installed_cli(tmp_path):
     source = tmp_path / 'full.sp'
     source.write_text(CELL)
-    executable = Path(__file__).resolve().parents[2] / '.venv/bin/netlist-compare'
+    executable = Path(sys.executable).with_name('netlist-compare')
     proc = subprocess.run([str(executable), str(source), '--top', 'TOP', '--path-a', 'TOP/X1',
                            '--path-b', 'TOP/X2'], check=True, text=True, capture_output=True)
     assert json.loads(proc.stdout)['a']['selection']['path'] == 'TOP/X1'
