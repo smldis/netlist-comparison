@@ -29,6 +29,9 @@ def compare(a: CanonicalNetlist, b: CanonicalNetlist, *, top_a: str, top_b: str,
 
 
 def _compare_views(a, b, va, vb, options, scope_a, scope_b, start, top_a, top_b):
+    if options.black_box_missing:
+        from .blackbox import reconcile
+        reconcile(va, vb)
     expanded = perf_counter()
     fa, fb = features(va), features(vb)
     context_evidence = None
@@ -116,8 +119,13 @@ def _compare_views(a, b, va, vb, options, scope_a, scope_b, start, top_a, top_b)
             record["correspondence"] = "tentative"
             type_equal = fa[i].type == fb[j].type
             record["evidence"] = {"structure_cost": cc[candidate] - (0 if type_equal else options.type_penalty),
-                                  "type_equal": type_equal, "external_neighbors_on_both_sides": True,
+                                  "type_equal": type_equal, "external_neighbors_on_both_sides": all(
+                                      any(len({n for n, _ in view.nets[net]}) > 1
+                                          for net in view.leaves[cls.members[0]].nets.values())
+                                      for view, cls in ((va, fa[i]), (vb, fb[j]))),
                                   "raw_attributes_used_for_scoring": False}
+            if fa[i].black_box_key:
+                record['evidence']['black_box_interface_assumed'] = True
             if context_evidence is not None:
                 base_cost = float(abs(fa[i].vector - fb[j].vector).sum() / 8)
                 record["evidence"].update(
@@ -216,6 +224,11 @@ def _compare_views(a, b, va, vb, options, scope_a, scope_b, start, top_a, top_b)
                     "seconds": {"expand": expanded - start, "features": featured - expanded,
                                 "search": searched - featured, "assignment": solved - searched}},
     }
+    if options.black_box_missing:
+        result['scope']['black_box_assumption'] = (
+            'Missing cells with the same case-insensitive reference and compatible terminals '
+            'have unchanged hidden implementations and stable pin order/names. '
+            'Only connections and raw instance overrides are compared; internals are unavailable.')
     if context_evidence is not None:
         result["context_evidence"] = context_evidence
     result["metrics"]["seconds"]["report"] = perf_counter() - solved

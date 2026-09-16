@@ -59,7 +59,8 @@ def catalog(view: View):
                      "definition": l.definition, "type": l.device.type,
                      "parameters": [asdict(p) for p in l.device.parameters],
                      "connections": [asdict(c) for c in l.device.connections],
-                     "resolved_nets": l.nets, "opaque_reason": l.opaque}
+                     "resolved_nets": l.nets, "opaque_reason": l.opaque,
+                     "black_box": l.black_box}
                     for l in view.leaves],
         "occurrences": view.occurrences,
         "definitions": [{"name": c.name, "pins": list(c.pins),
@@ -70,6 +71,7 @@ def catalog(view: View):
         "unresolved": view.unresolved,
         "expansion_complete": not view.budget_exhausted,
         "expanded_leaf_count": len(view.leaves),
+        "black_box_leaf_count": sum(l.black_box is not None and l.opaque is None for l in view.leaves),
         "max_depth": max((o["depth"] for o in view.occurrences), default=0),
     }
 

@@ -24,11 +24,13 @@ EXAMPLES = """Start here (inputs are SPICE/Eldo/ngspice files, not rendered cano
       Compare two actual block calls, including their pins, in one file.
   netlist-compare before.sp after.sp --matching-mode regional --output result.json
       Try experimental hierarchy/regrouping matching; fixed remains the default.
+  netlist-compare before.sp after.sp --black-box-missing --text
+      Compare missing library cells by stable reference, pin order and overrides.
 
 Reading results:
   A/B paths are places to inspect in the two schematics. Pairings are tentative.
   Raw parameter changes are not evaluated expressions or electrical effects.
-  Unpaired does not prove added/deleted; missing libraries remain opaque.
+  Unpaired does not prove added/deleted; missing libraries are opaque by default.
   Zero displayed differences does not prove equivalence.
   Terminal output is readable text; redirected output is JSON. --text / --json
   override this choice. --output always saves full JSON, regardless of display.
@@ -76,6 +78,7 @@ def build_parser():
     select.add_argument('--format', choices=('eldo', 'ngspice'), default='eldo', help='Input syntax for both files (default: eldo)')
     select.add_argument('--global-net', action='append', default=[], metavar='NET', help='Extra global net on both sides, e.g. VDD; repeatable; ground 0 is included')
     select.add_argument('--globals-complete', action='store_true', help='Assert these globals plus 0 are complete; otherwise completeness is unknown')
+    select.add_argument('--black-box-missing', action='store_true', help='Compare undefined cells as black boxes: assume unchanged internals and stable cell references/pin order; incompatible interfaces stay unresolved')
     output = parser.add_argument_group('Read or save results')
     output.add_argument('--output', type=Path, metavar='FILE', help='Save complete JSON (replaces FILE); show a short terminal summary')
     display = output.add_mutually_exclusive_group()
@@ -129,6 +132,7 @@ def main(argv=None):
         if args.context_mode != 'none' and args.matching_mode != 'fixed':
             parser.error('--context-mode frozen_neighbors requires --matching-mode fixed; omit --context-mode for other modes.')
         options = Options(matching_mode=args.matching_mode, context_mode=args.context_mode,
+                          black_box_missing=args.black_box_missing,
                           **{name: getattr(args, name) for name in BUDGET_HELP})
         scope = InputScope(tuple(['0', *args.global_net]), args.globals_complete)
         for path in filter(None, (args.a, args.b)):

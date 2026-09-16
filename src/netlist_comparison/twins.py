@@ -7,13 +7,14 @@ from collections import defaultdict
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from .report import parameter_differences
+from .blackbox import key as black_box_key
 
 
 def terminal_twins(view):
     groups = defaultdict(list)
     for i, leaf in enumerate(view.leaves):
         if not leaf.opaque:
-            key = (leaf.device.type.casefold(), tuple(sorted((r.casefold(), n) for r, n in leaf.nets.items())))
+            key = (leaf.device.type.casefold(), tuple(sorted((r.casefold(), n) for r, n in leaf.nets.items())), black_box_key(leaf))
             groups[key].append(i)
     return list(groups.values())
 

@@ -8,6 +8,7 @@ it does not infer historical identity or certify the full automorphism group.
 
 def complete_closure(a, b, plans, limit=64):
     from .regional import net_alignment
+    from .blackbox import compatible
     size = len(a.leaves)
     info = {'limit': limit, 'verified_generators': 0, 'added_hypotheses': 0,
             'truncated': False, 'scope': 'Closure of observed type/role/incidence automorphisms only; other structural symmetries may remain undiscovered.'}
@@ -25,6 +26,7 @@ def complete_closure(a, b, plans, limit=64):
         permutation = tuple(inverse[j] for j in other)
         if permutation == identity or permutation in generators: continue
         if any(a.leaves[i].device.type.casefold() != a.leaves[j].device.type.casefold()
+               or not compatible(a.leaves[i], a.leaves[j])
                for i, j in enumerate(permutation)): continue
         if net_alignment(a, a, list(enumerate(permutation)))[0] == 0:
             generators.append(permutation)

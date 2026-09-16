@@ -74,7 +74,10 @@ def match_partial(a,b,*,iterations=6,max_cells=5000000,use_names=True):
         unary+=.04*(np.array(ha[depth])[:,None]!=np.array(hb[depth])[None,:])
     # Opaque objects are never optimization variables for correspondence.
     opa=np.array([bool(x.opaque) for x in a.leaves]);opb=np.array([bool(x.opaque) for x in b.leaves])
+    from .blackbox import key as black_box_key
     forbidden=opa[:,None]|opb[None,:]
+    forbidden |= (np.array([black_box_key(x) for x in a.leaves])[:,None] !=
+                  np.array([black_box_key(x) for x in b.leaves])[None,:])
     aa,bb=channels(a),channels(b)
     common=sorted(aa.keys()&bb.keys())
     def relation(p):

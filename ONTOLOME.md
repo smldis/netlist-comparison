@@ -248,6 +248,26 @@ These controls establish useful partial inspection on public synthetic inputs,
 not broad dialect compatibility or simulated electrical equivalence. Prototype
 maturity is unchanged.
 
+## Missing-cell boundaries as explicit comparison objects
+
+User experience showed that preserving known circuitry beside opaque calls is
+insufficient when most leaves come from unavailable libraries. Opt-in
+`black_box_missing` adopts a boundary-only interpretation of the existing canonical
+call evidence: ordered retained nets become positional terminals, or supplied
+named terminals remain named, and instance overrides stay raw. This is comparator
+policy, not extraction or inferred formal names. Same cell reference and compatible
+interface are hard correspondence constraints under an explicit assumption of
+unchanged internals and stable terminal identity. Incompatible interfaces and
+one-sided definitions abstain; malformed primitives and budgets remain opaque.
+
+Available terminal incidence and unavailable internals are separate dimensions.
+Black-box leaves participate in matching and component certificates, with the
+latter limited to represented boundary incidence. Original diagnostics, hidden
+internal scope, and positional provenance remain inspectable. Net renaming cannot
+become a synthetic override change. Selected known blocks can contain such leaves;
+direct selection of unavailable internals remains excluded. Existing repeated-class
+and heuristic search limitations remain. Prototype maturity is unchanged.
+
 ## CLI discovery and presentation
 
 User experience exposed a boundary gap: requiring code/docs to discover circuit

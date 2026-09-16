@@ -1,5 +1,18 @@
 # Netlist Comparison
 
+Missing library cells can be compared explicitly as black boxes:
+
+```bash
+netlist-compare before.sp after.sp --black-box-missing --matching-mode regional --output result.json
+```
+
+This assumes unchanged hidden implementations, stable cell references and stable
+terminal order. It compares connections and raw instance overrides without the
+library definitions. Positional terminals are labelled `@1`, `@2`, etc.; these
+are positions, not inferred pin names. Mismatched interfaces stay unresolved.
+Internals remain unavailable and original extraction diagnostics remain visible.
+The default still leaves undefined calls opaque. See the guide for scope/limits.
+
 A Python prototype that proposes counterparts between canonical analog netlists
 and reports raw differences **conditional on those pairings**. It preserves
 hierarchy locations, shared definitions, alternatives and unresolved regions.

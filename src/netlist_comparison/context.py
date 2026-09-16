@@ -51,9 +51,9 @@ def refine(view, classes):
             context.append((role.casefold(), count, tag, 1 / math.sqrt(max(1, degree - 1))))
         context = tuple(context)
         base = base_for_leaf[i]
-        key = (base.type, tuple(base.vector), base.supported, context)
+        key = (base.type, tuple(base.vector), base.supported, context, base.black_box_key)
         if key not in grouped:
-            grouped[key] = FeatureClass([], base.vector, base.type, base.supported, context)
+            grouped[key] = FeatureClass([], base.vector, base.type, base.supported, context, base.black_box_key)
         grouped[key].members.append(i)
     evidence = {
         "recipe": "sha256 JSON [type,v1_vector,supported]; endpoint sha256 [signature,lowercase_role]; sum modulo 2^256, excluding all subject endpoints",

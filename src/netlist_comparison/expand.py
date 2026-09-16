@@ -6,6 +6,7 @@ from urllib.parse import unquote
 from spice_canonical.canonical_netlist import CanonicalNetlist
 
 from .model import InputScope, Leaf, Options, View, location
+from .blackbox import represent
 
 
 def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Options, *, path: str | None = None) -> View:
@@ -132,6 +133,9 @@ def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Opti
         # can collide with a primitive's model type and cannot identify a call.
         is_call = device.name[:1].casefold() == "x"
         target = definitions.get(params.get("source_type", device.type).casefold()) if is_call else None
+        black_box = None
+        if is_call and target is None and options.black_box_missing:
+            device, black_box = represent(device)
         pins = [c.pin.casefold() for c in device.connections]
         opaque = None
         if len(pins) != len(set(pins)):
@@ -148,13 +152,16 @@ def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Opti
                 child_bindings = {c.pin.casefold(): nets[c.pin] for c in device.connections}
                 stack.append(enter(target, child_parts, child_bindings, active, ancestors, device))
                 continue
-        elif is_call:
+        elif is_call and black_box is None:
             opaque = opaque or "unresolved_definition"
         if device.type.casefold() == "unresolved" or not device.connections:
             opaque = opaque or "unrepresented_connectivity"
         if opaque:
             view.unresolved.append({"region": path, "reason": opaque, "hidden_leaf_count": None})
-        leaf = Leaf(path, child_parts, ancestors[-1], ancestors, circuit.name, device, nets, opaque)
+        if black_box and not opaque:
+            view.unresolved.append({"region": path, "reason": "black_box_internals_unavailable",
+                                    "hidden_leaf_count": None})
+        leaf = Leaf(path, child_parts, ancestors[-1], ancestors, circuit.name, device, nets, opaque, black_box)
         index = len(view.leaves)
         view.leaves.append(leaf)
         for role, net in nets.items():
