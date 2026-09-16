@@ -41,6 +41,10 @@ sharing must not collapse physical occurrences or force one-to-one definitions.
 
 No child units. The parent registers this independently installable package and
 its explicit dependency on the public `spice_canonical.canonical_netlist` types.
+The implementation is published in its own public Git repository and composed
+into ASS as a submodule. Standalone checkout instructions identify the tested
+canonical revision; research history remains in the observatory. Publication
+does not change prototype maturity or extend the demonstrated accuracy domain.
 
 ## What the first execution taught us
 

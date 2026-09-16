@@ -7,12 +7,15 @@ Output is structured JSON; names are labels, not inferred circuit functions.
 
 ## Development history
 
-This package has an independent local Git repository. The initial `main` baseline
+Public repository: [smldis/netlist-comparison](https://github.com/smldis/netlist-comparison).
+
+This package has an independent Git repository. The initial `main` baseline
 records the reviewed prototype on 2026-09-16, including budgeted regional matching,
 instance/pin comparison and incomplete-library handling. Subsequent experiments
 use topic branches and focused, tested commits. Research reports remain in the
-sibling observatory; `spice-canonical` retains its own history. No remote or parent
-submodule registration is configured yet.
+sibling observatory; `spice-canonical` retains its own history. It is composed into
+ASS as a Git submodule. Some research links require the surrounding ASS workspace;
+the package source, tests, examples and usage documentation are included here.
 
 ## Run from ASS
 
@@ -25,13 +28,30 @@ uv sync --group dev
   --output /tmp/netlist-comparison.json
 ```
 
-For independent installation, install `spice-canonical` and this package into
-the same environment. NumPy and SciPy are declared dependencies:
+## Standalone checkout
+
+Use sibling checkouts to reproduce the reviewed dependency state:
 
 ```bash
-python -m pip install -e ../spice-canonical -e .
+git clone https://github.com/smldis/spice-canonical.git
+git -C spice-canonical checkout dcf9dfb4e85f4d87fac5fa8e9f410c20759188ed
+git clone https://github.com/smldis/netlist-comparison.git
+cd netlist-comparison
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ../spice-canonical -e . pytest
 python -m pytest -q tests
+netlist-compare examples/before.sp examples/after.sp --top-a TOP --top-b TOP \
+  --output comparison.json
 ```
+
+The pinned canonical revision adds the reviewed ambiguous-BJT correction; its PR
+is separate from this package. Older canonical revisions can supply guessed BJT
+terminals and will fail those regression tests. NumPy and SciPy are declared
+runtime dependencies. No simulator or private netlist is required for the tests.
+The full ASS validation passed 196 canonical, comparator and integration tests.
+
+License: [Apache-2.0](LICENSE), matching the other ASS components.
 
 ## Python API
 
