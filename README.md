@@ -43,6 +43,54 @@ defaults, call overrides, hierarchy and pin details remain in JSON. Matching
 remains `fixed` by default; `--matching-mode regional` opts into the experimental
 hierarchy/regrouping matcher. No interactive prompts are required.
 
+### Inspect a saved result
+
+```bash
+netlist-compare view result.json --under-a TOP/XOLD --category raw --text
+netlist-compare view result.json --under-b TOP/XMOVED --category wiring --output focused.view.json
+netlist-compare view result.json --parameter W --group-depth 1 --json
+```
+
+`view` reads complete saved comparison JSON (`.json` or `.json.gz`) without
+loading netlists or matching. Terminal output is a bounded text preview;
+redirected output or `--json` emits complete derived JSON. `--text` forces a
+preview. `--output` saves derived JSON and cannot name or alias the source.
+`--limit` affects text only. Invalid reports, paths and filters exit 2.
+
+Repeat `--under-a PATH` and `--under-b PATH` for exact, case-insensitive
+subtrees using percent-escaped catalog paths. A pair is selected if either
+side lies under a requested path; moved counterparts remain visible. Repeat
+`--category raw|wiring|unpaired` to select findings (default: all). `raw`
+covers representative leaf-pair raw fields. `--parameter NAME` selects only
+`parameters.NAME` and requires `raw`; it does not mean all parameter changes.
+Definition defaults and call overrides remain unfiltered in `context.hierarchy`.
+Expressions are not evaluated.
+
+`--group-depth N` collapses text to finding counts by occurrence at depth N
+relative to each selected comparison root, including selected-instance roots.
+A shallow branch uses its closest available ancestor. JSON still retains all
+selected leaf rows. Group counts show scoped representative pairs, shown raw
+changed pairs, shown unpaired objects per side, and shown wiring partition rows
+touching that group. A wiring row can touch several groups, so those counts do
+not sum to independent wiring edits. Text omits groups with no selected findings;
+JSON retains those groups as context. Category total/shown/
+hidden counts refer to raw edited pairs, wiring partition rows, and unpaired/
+unresolved/opaque object rows. These are different record kinds, not independent
+design edits. A selected wiring row retains every endpoint token, including
+ones across the selected scope. Raw net labels alone are not wiring evidence.
+
+Derived JSON has a distinct `kind`, a reproducible report-content SHA-256,
+source artifact SHA-256 when saved bytes are available, and input identity,
+filters, counts, findings, hierarchy groups, source scope, and full coupling
+context. Pair options, groups, alternatives, component factors, hierarchy,
+boundary pins, diagnostics, unresolved regions, coverage, opacity and black-box
+assumptions remain where present. It can be large because ambiguity cannot be
+trimmed into apparent certainty. It cannot replace a full comparison report.
+Empty findings mean only none selected. Unpaired or opaque objects are not
+proven additions or deletions; filtering cannot recover unexplored candidates.
+Text wiring rows show A/B instance paths and terminal roles for bounded
+endpoint previews, including roles containing colons.
+
 ## Development history
 
 Public repository: [smldis/netlist-comparison](https://github.com/smldis/netlist-comparison).
