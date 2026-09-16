@@ -6,6 +6,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 
 from .model import Options, View
+from .blackbox import key as black_box_key
 
 
 ROLES = ("d", "g", "s", "b", "p", "n", "a", "k", "c", "e", "cp", "cn",
@@ -21,6 +22,7 @@ class FeatureClass:
     type: str
     supported: bool
     context: tuple = ()
+    black_box_key: str = ''
 
 
 def features(view: View) -> list[FeatureClass]:
@@ -49,10 +51,10 @@ def features(view: View) -> list[FeatureClass]:
             # any terminal. Exclude the device itself as a witness.
             vector[r, 4:] += neighbours / max(1, degree - 1) / math.sqrt(max(1, degree))
         vector = vector.ravel()
-        supported = external and leaf.opaque is None
-        key = (leaf.device.type.casefold(), tuple(vector), supported)
+        supported = (external or leaf.black_box is not None) and leaf.opaque is None
+        key = (leaf.device.type.casefold(), tuple(vector), supported, black_box_key(leaf))
         if key not in grouped:
-            grouped[key] = FeatureClass([], vector, key[0], supported)
+            grouped[key] = FeatureClass([], vector, key[0], supported, black_box_key=key[3])
         grouped[key].members.append(i)
     # Class IDs depend on structural values, never on instance traversal order.
     return [grouped[key] for key in sorted(grouped)]
@@ -72,6 +74,8 @@ def search(a: list[FeatureClass], b: list[FeatureClass], options: Options):
     vb = np.stack([c.vector for c in b]) if b else np.empty((0, len(ROLES) * WIDTH))
     ta = np.array([c.type for c in a])
     tb = np.array([c.type for c in b])
+    ka = np.array([c.black_box_key for c in a])
+    kb = np.array([c.black_box_key for c in b])
 
     def retain(costs, ids, row, values, candidates):
         cs = np.concatenate((costs[row], values))
@@ -104,6 +108,7 @@ def search(a: list[FeatureClass], b: list[FeatureClass], options: Options):
                 distances += options.context_weight * penalty / np.maximum(
                     1, np.maximum(counts_a[i:i + ni, None], counts_b[None, j:j + nj]))
             costs = distances + options.type_penalty * (ta[i:i + ni, None] != tb[None, j:j + nj])
+            costs[ka[i:i + ni, None] != kb[None, j:j + nj]] = np.inf
             for r in range(ni):
                 retain(best_a, ids_a, i + r, costs[r], np.arange(j, j + nj))
             for c in range(nj):
@@ -116,11 +121,11 @@ def search(a: list[FeatureClass], b: list[FeatureClass], options: Options):
     candidates = {}
     for i in range(na):
         for cost, j in zip(best_a[i, :k], ids_a[i, :k]):
-            if j >= 0:
+            if j >= 0 and np.isfinite(cost):
                 candidates[i, int(j)] = float(cost)
     for j in range(nb):
         for cost, i in zip(best_b[j, :k], ids_b[j, :k]):
-            if i >= 0:
+            if i >= 0 and np.isfinite(cost):
                 candidates[int(i), j] = float(cost)
 
     def records(best, examined, opposite):

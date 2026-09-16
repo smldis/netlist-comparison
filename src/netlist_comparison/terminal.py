@@ -37,6 +37,8 @@ def summary(report, limit, output=None):
     lines = [f'Comparison: {scope["top_a"]} -> {scope["top_b"]}',
              f'Matching: {report["options"]["matching_mode"]}; all counterparts are tentative.']
     lines.append(f'Reference candidate screening complete: {report["metrics"]["screening_complete"]}')
+    if 'black_box_assumption' in scope:
+        lines.append('Black-box assumption: ' + scope['black_box_assumption'])
     budget = report.get('partial_alignment', {}).get('compute_budget')
     if budget:
         lines.append(f'Regional work: {budget["used"]}/{budget["limit"]}; exhausted: {budget["exhausted"]} (not a time/RAM cap)')
@@ -48,6 +50,8 @@ def summary(report, limit, output=None):
         coverage = ', '.join(f'{k}={v}' for k, v in data['coverage'].items())
         lines += [f'{side.upper()}: {data["expanded_leaf_count"]} materialized leaves; {coverage}',
                   f'  Expansion finished within budget: {data["expansion_complete"]}; input diagnostics: {len(data["diagnostics"])}']
+        if data.get('black_box_leaf_count'):
+            lines.append(f'  Black-box leaves with comparable terminals: {data["black_box_leaf_count"]}; hidden internals unavailable.')
         rows(lines, data['unresolved'], limit, lambda u: f'{u["region"]}: {u["reason"]}')
         not_paired = [d for d in data['disposition'] if d['status'] in ('unpaired', 'unresolved', 'opaque')]
         rows(lines, not_paired, limit, lambda d: f'{d["object"]}: {d["status"]} ({d["reason"]})')

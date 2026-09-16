@@ -14,6 +14,7 @@ from scipy.optimize import linear_sum_assignment
 
 from .context import digest
 from .model import View
+from .blackbox import key as black_box_key
 
 
 @dataclass
@@ -66,6 +67,8 @@ def incidence_search(a, b, work, *, fixed=(), width=64):
     for r in range(len(roles)):
         base += (ax[:, r, None] < 0) != (bx[None, :, r] < 0)
     forbidden = np.array([bool(x.opaque) for x in a.leaves])[:, None] | np.array([bool(x.opaque) for x in b.leaves])[None, :]
+    forbidden |= (np.array([black_box_key(x) for x in a.leaves])[:, None] !=
+                  np.array([black_box_key(x) for x in b.leaves])[None, :])
     def assignment(mapping):
         am = np.full(len(an) + 1, -3); bm = np.full(len(bn) + 1, -3)
         for u, v in mapping:
@@ -167,7 +170,8 @@ def certificate(view, indices, boundary):
         for r, n in sorted(leaf.nets.items()):
             if n not in boundary and n not in internal: internal[n] = len(internal)
             endpoints.append((r.casefold(), ('boundary', boundary[n]) if n in boundary else ('inside', internal[n])))
-        rows.append((leaf.device.type.casefold(), tuple(endpoints)))
+        row = (leaf.device.type.casefold(), tuple(endpoints))
+        rows.append(row + (black_box_key(leaf),) if leaf.black_box else row)
     return tuple(rows), [indices[i] for i in order]
 
 

@@ -9,11 +9,13 @@ from collections import Counter, defaultdict
 from time import perf_counter
 
 from .context import digest
+from .blackbox import key as black_box_key, compatible
 
 
 def structural_labels(view, depth, degree_limit):
     dense = {net for net, es in view.nets.items() if len({i for i, _ in es}) > degree_limit}
-    labels = [digest([leaf.device.type.casefold(), sorted(r.casefold() for r in leaf.nets), bool(leaf.opaque)])
+    labels = [digest([leaf.device.type.casefold(), sorted(r.casefold() for r in leaf.nets), bool(leaf.opaque)]
+                     + ([black_box_key(leaf)] if leaf.black_box else []))
               for leaf in view.leaves]
     history = [labels]
     for _ in range(depth):
@@ -84,6 +86,8 @@ def match_views(a, b, *, depth=3, rounds=64, degree_limit=32, max_candidates=200
                     stop = 'candidate_budget'
                     break
                 la, lb = a.leaves[i], b.leaves[j]
+                if not compatible(la, lb):
+                    continue
                 if la.device.type.casefold() != lb.device.type.casefold() or {r.casefold() for r in la.nets} != {r.casefold() for r in lb.nets}:
                     continue
                 overlap = tokens & cb[j]

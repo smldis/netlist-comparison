@@ -72,6 +72,48 @@ not the full deck, include tree or model library.
 
 ## Read the result
 
+### Missing library cells
+
+Use `--black-box-missing` (Python: `Options(black_box_missing=True)`) when missing
+library implementations can be assumed unchanged across the inputs. For example,
+`X1 out in 0 cell W=1u` versus `X1 out in 0 cell W=3u` can report the raw `W`
+override change even without a `.subckt cell` declaration. The option works with
+all matching modes; `regional` is useful for repeated cells and hierarchy changes,
+while the fixed matcher still leaves repeated feature classes unresolved.
+
+The comparison uses the case-insensitive cell reference and a compatible
+terminal interface as hard candidate constraints. Unnamed retained connections
+become positions `@1`, `@2`, etc., assuming stable order; supplied named signatures
+retain their names. Named connection list order is not identity: reordering
+entries preserves incidence, while changing role-to-net assignments supplies
+wiring-change evidence. Mixed named/positional signatures, inconsistent pin counts
+or named role sets, and definitions available on only one side stay unresolved. A cell
+reference rename is therefore outside this assumption and stays unpaired. Missing
+calls present on only one side can still appear as unpaired, not proven additions.
+When canonical device types are normalized, retained `source_type` supplies the
+original cell reference. Quoted/grouped names in the legacy `unresolved_nets`
+string remain opaque rather than guessing where their net tokens end; supplied
+named connections avoid that limitation.
+
+Only represented connections and raw overrides are compared. Synthetic
+`unresolved_nets` metadata is retained in each object's `black_box` evidence and
+excluded from override differences, so a net rename does not become a parameter
+change. `scope.black_box_assumption`, each object's `black_box`, and per-side
+`black_box_leaf_count` distinguish comparable boundaries from unavailable
+internals. That count overlaps ordinary disposition counts; it is not another
+disjoint coverage category. Hidden internals remain in `unresolved`, and original
+parser diagnostics remain visible. Certificates concern boundary incidence only,
+not hidden circuitry or electrical equivalence.
+
+Known selected subcircuits may contain black-box descendants. Selecting an
+undefined call itself as a subtree still rejects with `unresolved_definition`:
+there is no available internal circuit to expand. Malformed calls, ambiguous
+primitive syntax and expansion-budget exclusions are not promoted to black boxes.
+Model bodies remain uninterpreted; syntax-defined primitive terminals remain
+usable without model declarations. No parser or canonical format change is needed.
+
+### Report fields
+
 | Field | Meaning |
 |---|---|
 | `scope`, `options` | Input omissions, explicit scoping knowledge and experimental budgets/costs |

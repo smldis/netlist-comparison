@@ -35,8 +35,11 @@ class Options:
     unmatched_cost: float = 0.3  # paid on EACH side
     type_penalty: float = 0.12
     ambiguity_tolerance: float = 1e-9
+    black_box_missing: bool = False
 
     def __post_init__(self):
+        if type(self.black_box_missing) is not bool:
+            raise ValueError("black_box_missing must be a boolean")
         if self.matching_mode not in ("fixed", "anchor_growth", "partial_qap", "regional"):
             raise ValueError("matching_mode must be fixed, anchor_growth, partial_qap or regional")
         if self.matching_mode != "fixed" and self.context_mode != "none":
@@ -71,6 +74,7 @@ class Leaf:
     device: Device
     nets: dict[str, str]
     opaque: str | None = None
+    black_box: dict | None = None
 
 
 @dataclass

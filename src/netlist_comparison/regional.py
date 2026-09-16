@@ -64,6 +64,9 @@ def local_pairs(ia, ib, fa, fb):
     Local symmetries survive as alternative leaf assignments. The full graph
     later evaluates boundary consistency, including residual devices.
     """
+    from .blackbox import key as black_box_key
+    incompatible = (np.array([black_box_key(x) for x in fa[6].leaves])[:, None] !=
+                    np.array([black_box_key(x) for x in fb[6].leaves])[None, :])
     base = cdist(fa[1], fb[1], 'cityblock') / 8
     base += .12 * (fa[3][:, None] != fb[3][None, :])
     for ha, hb in zip(fa[4], fb[4]):
@@ -90,6 +93,7 @@ def local_pairs(ia, ib, fa, fb):
             xa, xb = da[:, :, order], db
         cost = base + .25 * cdist(xa.reshape(len(ia), -1), xb.reshape(len(ib), -1), 'cityblock')
         cost[fa[5], :] = 1e6; cost[:, fb[5]] = 1e6
+        cost[incompatible] = 1e6
         matrix = np.full((len(ia), len(ib) + len(ia)), 1e6)
         matrix[:, :len(ib)] = cost - 1.2
         matrix[np.arange(len(ia)), len(ib) + np.arange(len(ia))] = 0
@@ -140,6 +144,7 @@ def net_alignment(a, b, plan):
 
 def residual_pairs(a, b, ia, ib, netmap, *, unmatched_per_side=.6):
     """Pair small residual sets using mapped terminal roles, with null choices."""
+    from .blackbox import compatible
     if not ia or not ib:
         return []
     cost = np.full((len(ia), len(ib) + len(ia)), 1e6)
@@ -150,7 +155,7 @@ def residual_pairs(a, b, ia, ib, netmap, *, unmatched_per_side=.6):
         xn = {r.casefold(): n for r, n in x.nets.items()}
         for j, bj in enumerate(ib):
             y = b.leaves[bj]
-            if y.opaque:
+            if y.opaque or not compatible(x, y):
                 continue
             yn = {r.casefold(): n for r, n in y.nets.items()}
             roles = xn.keys() | yn.keys()
