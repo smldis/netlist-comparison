@@ -281,3 +281,32 @@ force a format; saved output always retains full evidence. Diagnostics, opacity,
 search limits and ambiguity remain visible in previews. Defaults/overrides and
 coupled hierarchy/pin details still require the full report. The fixed default,
 API contract and prototype maturity are unchanged.
+
+## Saved-result inspection
+
+Saved full reports now support a pure projection boundary and a `view` CLI.
+This adopts the earlier inspection hypothesis without extending the matcher:
+the view selects represented raw leaf fields, net-partition rows and unpaired
+object dispositions by exact A/B subtree, optionally groups representative
+pairs by occurrence depth, and keeps the source report immutable. Source
+identity/hash, before/after record counts, scope, diagnostics, unresolved and
+opaque evidence, black-box assumptions, and coupled pair/group/factor context
+remain visible. The derived artifact has a distinct kind and cannot be read
+as another full comparison. This boundary makes focused review useful while
+preserving the evidence that a representative is tentative.
+
+Experience from root review refined that boundary: endpoint tokens carry a
+pair ID and a role that may contain colons; resolving from the first separator
+preserves named-bus evidence. Group depth is relative to each selected root and
+uses the closest available ancestor for shallow branches. Grouped text now
+collapses leaf detail but JSON retains it, including full endpoint context.
+Every projection records a canonical report-content hash even without saved
+bytes; an exact artifact hash is separate. Returned data is detached from the
+source report so later view edits cannot rewrite evidence in memory.
+
+The report still lacks independent wiring-event identity and evaluated
+parameter values. Definition defaults and call overrides remain as unfiltered
+hierarchy context rather than counted as leaf raw findings. A view cannot
+recover unexplored alternatives or establish equivalence from an empty
+selection. This is an inspection capability in the existing prototype, not a
+maturity change or a new claim about matching accuracy.

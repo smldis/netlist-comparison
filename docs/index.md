@@ -20,6 +20,7 @@ examples, option explanations and defaults.
 netlist-compare design.sp --inspect
 netlist-compare before.sp after.sp --output result.json
 netlist-compare full.sp --path-a TOP/X1 --path-b TOP/X2
+netlist-compare view result.json --under-a TOP/X1 --category raw --text
 ```
 
 Inspection lists circuit names, pins, actual block paths and input problems.
@@ -35,6 +36,23 @@ an abbreviated preview on stderr when stdout is redirected (suppressed by `--jso
 defaults, call overrides, hierarchy and pin details remain in JSON. Matching
 remains `fixed` by default; `--matching-mode regional` opts into the experimental
 hierarchy/regrouping matcher. No interactive prompts are required.
+
+Saved reports can be projected without netlist loading or matching. Run
+`netlist-compare view result.json --help` for path, category, parameter,
+hierarchy grouping and display options. Exact, case-insensitive decoded A/B
+subtrees retain counterparts outside the opposite focus. `--limit` bounds text
+only. Group depth is relative to each selected comparison root; text collapses
+to grouped finding counts while JSON keeps the selected rows. Derived JSON keeps
+the report-content hash, saved artifact hash when available, input identity,
+total/shown/hidden counts,
+input scope, diagnostics, unresolved and black-box status, and coupled
+alternatives. Raw findings cover leaf fields; definition defaults and call
+overrides stay in unfiltered hierarchy context. Wiring rows are overlapping
+endpoint-partition evidence, not independent rewiring events. A view is an
+inspection artifact, never a replacement comparison report.
+
+Grouped text omits groups without selected findings; the derived JSON retains
+their context and all selected leaf details.
 
 Exit 0 means completion, possibly partial; exit 2 means invalid usage/input or I/O.
 No equality/difference exit-code convention or new matching semantics is introduced.
