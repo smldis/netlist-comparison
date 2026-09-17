@@ -10,7 +10,14 @@ from .blackbox import represent
 
 
 def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Options, *, path: str | None = None) -> View:
+    # File roots are selectable scopes, never implementations of X calls.
     definitions = {}
+    declared = {c.name.casefold(): c for c in netlist.subcircuits}
+    if netlist.top.name.casefold() in declared:
+        raise ValueError(
+            f"file root and declared subcircuit share name {netlist.top.name!r}; "
+            "valid canonical input, but comparison's name-keyed catalogs cannot disambiguate them. "
+            "Explicitly rename the file root before comparison (keep the declared subcircuit and calls unchanged).")
     for circuit in (netlist.top, *netlist.subcircuits):
         key = circuit.name.casefold()
         if key in definitions:
@@ -23,7 +30,8 @@ def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Opti
                 raise ValueError(f"duplicate {label} in {circuit.name}")
     if top.casefold() not in definitions:
         raise ValueError(f"unknown top circuit: {top}")
-    view = View(definitions={c.name: c for c in definitions.values()})
+    view = View(definitions={c.name: c for c in definitions.values()},
+                declared_subcircuits=set(declared))
     view.diagnostics = [{**asdict(d), "source": str(d.source) if d.source else None}
                         for d in netlist.diagnostics]
     globals_ = {name.casefold() for name in scope.global_nets}
@@ -76,7 +84,7 @@ def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Opti
             if call.name[:1].casefold() != "x":
                 raise ValueError("selected path must traverse subcircuit calls, not primitives")
             params = {p.name.casefold(): p.value for p in call.parameters}
-            target = definitions.get(params.get("source_type", call.type).casefold())
+            target = declared.get(params.get("source_type", call.type).casefold())
             if target is None:
                 raise ValueError(f"unresolved_definition at {location(root_parts + (call.name,))}")
             roles = [c.pin.casefold() for c in call.connections]
@@ -131,8 +139,10 @@ def expand(netlist: CanonicalNetlist, top: str, scope: InputScope, options: Opti
         params = {p.name.casefold(): p.value for p in device.parameters}
         # Canonical's public extraction uses SPICE instance prefixes; type alone
         # can collide with a primitive's model type and cannot identify a call.
-        is_call = device.name[:1].casefold() == "x"
-        target = definitions.get(params.get("source_type", device.type).casefold()) if is_call else None
+        boundary = getattr(device, 'black_box', None)
+        is_call = boundary is not None or device.name[:1].casefold() == "x"
+        cell = boundary.cell if boundary else params.get("source_type", device.type)
+        target = declared.get(cell.casefold()) if is_call and boundary is None else None
         black_box = None
         if is_call and target is None and options.black_box_missing:
             device, black_box = represent(device)

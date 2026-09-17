@@ -308,7 +308,7 @@ def _match_multifrontier(a, b):
     return plans, evidence
 
 
-def match_regional(a, b, *, work_limit=50_000):
+def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_limit=0):
     """Factor certified repeats; challenge small incumbents with incidence search."""
     from .budgeted import Work, factor_match, incidence_search
     start = perf_counter(); work = Work(work_limit)
@@ -364,7 +364,19 @@ def match_regional(a, b, *, work_limit=50_000):
         evidence.update(method='regional_budgeted_v5', stop='incidence_completion_improved',
                         names_used=False, attributes_used=False)
         tradeoffs = []
-    if evidence.get('method') == 'regional_budgeted_v5':
+    if omission_work_limit:
+        from .exchange import challenge
+        plans, exchange = challenge(a, b, plans, work_limit=omission_work_limit)
+        evidence['omission_search'] = exchange
+        if 'best_score' in exchange:
+            evidence.update(method='regional_omission_v6', stop='bounded_omission_challenge')
+    if swap_work_limit:
+        from .swaps import challenge as swap_challenge
+        plans, swaps = swap_challenge(a, b, plans, work_limit=swap_work_limit)
+        evidence['swap_search'] = swaps
+        if 'best_score' in swaps:
+            evidence.update(method='regional_swaps_v7', stop='bounded_paired_swaps')
+    if evidence.get('method') in ('regional_budgeted_v5', 'regional_omission_v6', 'regional_swaps_v7'):
         evidence['hypotheses'] = []
         for plan in plans:
             error, _ = net_alignment(a, b, plan)
@@ -373,7 +385,10 @@ def match_regional(a, b, *, work_limit=50_000):
                 'endpoint_disagreements': error,
                 'unmatched_leaves': len(a.leaves) + len(b.leaves) - 2 * len(plan),
                 'score': score(plan), 'regions': [], 'coarse_score': None,
-                'frontier_basis': 'certified_components' if evidence.get('component_permutation_factors') else 'net_incidence_beam',
+                'frontier_basis': ('paired_discrepancy_beam' if evidence.get('method') == 'regional_swaps_v7'
+                                   else 'omission_exchange_beam' if evidence.get('method') == 'regional_omission_v6'
+                                   else 'certified_components' if evidence.get('component_permutation_factors')
+                                   else 'net_incidence_beam'),
                 'unpaired_a': [l.path for i, l in enumerate(a.leaves) if i not in used_a],
                 'unpaired_b': [l.path for j, l in enumerate(b.leaves) if j not in used_b]})
     evidence['coverage_tradeoffs'] = tradeoffs

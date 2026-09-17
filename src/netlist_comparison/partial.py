@@ -139,13 +139,19 @@ def apply_partial_report(result,a,b,options):
     from .report import pair_record,connectivity,hierarchy
     if options.matching_mode == "regional":
         from .regional import match_regional
-        plans,evidence=match_regional(a,b,work_limit=options.regional_work_limit)
+        plans,evidence=match_regional(a,b,work_limit=options.regional_work_limit,
+                                      omission_work_limit=options.omission_work_limit,
+                                      swap_work_limit=options.swap_work_limit)
     else:
         plans,evidence=match_partial(a,b,max_cells=min(5000000,options.max_pair_scores))
     representative_selection = None
     if options.matching_mode == 'regional':
         from .twins import representatives
         plans, representative_selection = representatives(a, b, plans)
+        if options.component_presentation == 'minimum_raw':
+            from .component_presentation import refine
+            plans, component_selection = refine(a, b, plans, evidence.get('component_permutation_factors', []))
+            representative_selection['components'] = component_selection
     # Use a separate presentation group. Retain reference retrieval/groups as
     # alternatives, with their original fixed-feature proposals kept separately.
     result['reference_proposals']={k:result[k] for k in ('groups','pair_options','representative_pair_ids')}
@@ -194,6 +200,8 @@ def apply_partial_report(result,a,b,options):
         from .pieces import frontier_memberships
         result['hierarchy']['frontier_membership_hypotheses'] = frontier_memberships(a, b, plans)
         result['representative_selection'] = representative_selection
+        from .exchange import population
+        result['population_evidence'] = population(a, b, plans[-1] if plans else [])
     for side,view in [('a',a),('b',b)]:
         choices=defaultdict(list)
         for index, region in enumerate(regions):

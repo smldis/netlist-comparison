@@ -137,11 +137,12 @@ def test_original_library_identity_survives_type_normalization():
     assert not any(p['a'] == 'TOP/X1' or p['b'] == 'TOP/X1' for p in r['pair_options'])
 
 
-def test_ambiguous_retained_net_tokens_are_not_split_into_invented_pins():
+def test_canonical_token_boundaries_preserve_quoted_net_as_one_pin():
     source = 'X1 "two words" out missing\nR1 out 0 1k\n'
     r = run(source, source)
-    assert r['a']['coverage']['opaque'] == 1
-    assert next(x for x in r['a']['objects'] if x['id'] == 'TOP/X1')['connections'] == []
+    assert r['a']['coverage']['opaque'] == 0
+    assert next(x for x in r['a']['objects'] if x['id'] == 'TOP/X1')['connections'] == [
+        {'pin': '@1', 'net': '"two words"'}, {'pin': '@2', 'net': 'out'}]
 
 
 def test_isolated_cell_support_is_an_assumption_not_a_neighbour_witness():

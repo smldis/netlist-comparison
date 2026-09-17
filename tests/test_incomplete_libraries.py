@@ -25,9 +25,8 @@ def check_available(result, prefix_a, prefix_b):
         opaque = next(o for o in result[side]['objects'] if o['opaque_reason'])
         assert opaque['id'] == prefix + '/Xmissing'
         assert opaque['type'] == 'UnknownBlock'
-        assert opaque['connections'] == []
-        assert opaque['parameters'] == [dict(name='unresolved_nets', value='I O G'),
-                                        dict(name='gain', value='{K*2}')]
+        assert opaque['connections'] == [dict(pin='@1', net='I'), dict(pin='@2', net='O'), dict(pin='@3', net='G')]
+        assert opaque['parameters'] == [dict(name='gain', value='{K*2}')]
         assert result[side]['unresolved'] == [dict(region=opaque['id'], reason='unresolved_definition', hidden_leaf_count=None)]
         assert not any(p[side] == opaque['id'] for p in result['pair_options'])
         mos = next(o for o in result[side]['objects'] if o['id'].endswith('/M1'))

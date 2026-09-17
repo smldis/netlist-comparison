@@ -21,6 +21,8 @@ class Options:
 
     matching_mode: str = "fixed"
     regional_work_limit: int = 50_000  # new incidence states/component certificates only
+    omission_work_limit: int = 0  # opt-in full-map exchange scores; 0 disables
+    swap_work_limit: int = 0  # opt-in full-map paired-swap scores; 0 disables
     growth_rounds: int = 64
     context_mode: str = "none"  # v1 reference; opt-in frozen structural context
     context_weight: float = 0.35
@@ -36,8 +38,21 @@ class Options:
     type_penalty: float = 0.12
     ambiguity_tolerance: float = 1e-9
     black_box_missing: bool = False
+    component_presentation: str = "existing"
 
     def __post_init__(self):
+        if type(self.omission_work_limit) is not int or self.omission_work_limit < 0:
+            raise ValueError("omission_work_limit must be a nonnegative integer")
+        if self.omission_work_limit and self.matching_mode != "regional":
+            raise ValueError("omission_work_limit requires matching_mode regional")
+        if type(self.swap_work_limit) is not int or self.swap_work_limit < 0:
+            raise ValueError("swap_work_limit must be a nonnegative integer")
+        if self.swap_work_limit and self.matching_mode != "regional":
+            raise ValueError("swap_work_limit requires matching_mode regional")
+        if self.component_presentation not in ("existing", "minimum_raw"):
+            raise ValueError("component_presentation must be existing or minimum_raw")
+        if self.component_presentation != "existing" and self.matching_mode != "regional":
+            raise ValueError("component_presentation minimum_raw requires matching_mode regional")
         if type(self.black_box_missing) is not bool:
             raise ValueError("black_box_missing must be a boolean")
         if self.matching_mode not in ("fixed", "anchor_growth", "partial_qap", "regional"):
@@ -83,6 +98,7 @@ class View:
     leaves: list[Leaf] = field(default_factory=list)
     occurrences: list[dict] = field(default_factory=list)
     definitions: dict[str, Circuit] = field(default_factory=dict)
+    declared_subcircuits: set[str] = field(default_factory=set)
     nets: dict[str, list[tuple[int, str]]] = field(default_factory=dict)
     unresolved: list[dict] = field(default_factory=list)
     diagnostics: list[dict] = field(default_factory=list)
