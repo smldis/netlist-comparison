@@ -419,7 +419,7 @@ objects have reviewable conditional locations without forcing complete pairing.
 
 `compare_instances(netlist, *, top, path_a, path_b, options=None, scope=None)`
 compares two actual block calls in one full canonical input. See the
-[API/CLI examples and field semantics](../README.md#compare-two-actual-block-calls).
+[API/CLI examples and field semantics](https://github.com/smldis/netlist-comparison#compare-two-actual-block-calls).
 The existing two-input `compare` contract is unchanged. Selection does not create
 or serialize synthetic netlists. Internal port incidence, physical outer-net
 attachments, and conditional pin correspondence are distinct report layers.
