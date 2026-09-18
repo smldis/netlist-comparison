@@ -116,6 +116,11 @@ def summary(report, limit, output=None):
     budget = report.get('partial_alignment', {}).get('compute_budget')
     if budget:
         lines.append(f'Regional work: {budget["used"]}/{budget["limit"]}; exhausted: {budget["exhausted"]} (not a time/RAM cap)')
+    large = report.get('partial_alignment', {}).get('large_frontier_search')
+    if large:
+        lines.append(f'Sparse admission: {large["stop"]}; work {large["work_used"]}/{large["work_limit"]}; '
+                     f'conditional core {large["core_pairs"]}, final completion {large["completion_pairs"]}.')
+        lines.append('  Seed identity and alternatives remain unresolved; final completion never supports growth.')
     lines += omission_summary(report.get('population_evidence'),
                               report.get('partial_alignment', {}).get('omission_search'), limit)
     lines += swap_summary(report.get('partial_alignment', {}).get('swap_search'), limit)

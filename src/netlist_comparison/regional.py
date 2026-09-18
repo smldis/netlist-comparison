@@ -134,6 +134,24 @@ def net_alignment(a, b, plan):
                 seen.add(v); todo.append(v)
         aa = sorted(u for u in nodes if u[0] == 0)
         bb = sorted(u for u in nodes if u[0] == 1)
+        if len(aa) * len(bb) > 4096:
+            # A badly scrambled large leaf map can create one giant overlap
+            # block. Optional sparse assignment avoids its dense net product.
+            from scipy.sparse import csr_matrix
+            from scipy.sparse.csgraph import min_weight_full_bipartite_matching
+            ai, bi = {u: i for i, u in enumerate(aa)}, {v: j for j, v in enumerate(bb)}
+            ceiling = 1 + max(overlap[u, v] for u in aa for v in adjacency[u])
+            rows, cols, data = [], [], []
+            for u in aa:
+                for v in adjacency[u]:
+                    rows.append(ai[u]); cols.append(bi[v]); data.append(ceiling - overlap[u, v])
+                rows.append(ai[u]); cols.append(len(bb) + ai[u]); data.append(ceiling)
+            matrix = csr_matrix((data, (rows, cols)), shape=(len(aa), len(bb) + len(aa)))
+            rr, cc = min_weight_full_bipartite_matching(matrix)
+            for i, j in zip(rr, cc):
+                if j < len(bb):
+                    preserved += overlap[aa[i], bb[j]]; mapping[aa[i][1]] = bb[j][1]
+            continue
         matrix = np.array([[overlap[u, v] for v in bb] for u in aa])
         rr, cc = linear_sum_assignment(matrix, maximize=True)
         for i, j in zip(rr, cc):
@@ -308,7 +326,8 @@ def _match_multifrontier(a, b):
     return plans, evidence
 
 
-def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_limit=0):
+def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_limit=0,
+                   large_frontier_work_limit=0):
     """Factor certified repeats; challenge small incumbents with incidence search."""
     from .budgeted import Work, factor_match, incidence_search
     start = perf_counter(); work = Work(work_limit)
@@ -323,6 +342,16 @@ def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_
             plans, evidence = _match_multifrontier(a, b)
     else:
         plans, evidence = _match_multifrontier(a, b)
+    large_admission = False
+    if not any(plans) and large_frontier_work_limit and max(len(a.leaves), len(b.leaves)) > 128:
+        from .large_frontier import match
+        plans, search = match(a, b, work_limit=large_frontier_work_limit)
+        previous = {k: evidence.get(k) for k in ('stop', 'connectivity_frontier_available', 'frontier_trials')}
+        evidence.update(large_frontier_search=search, previous_admission=previous)
+        if plans:
+            large_admission = True
+            evidence.update(method='regional_sparse_frontier_v8', stop=search['stop'],
+                            names_used=False, attributes_used=False)
     def score(plan):
         error, _ = net_alignment(a, b, plan)
         return error + .6 * (len(a.leaves) + len(b.leaves) - 2 * len(plan))
@@ -340,7 +369,7 @@ def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_
     # Preserve the incumbent, but expose a separately labelled higher-coverage
     # completion for small unmatched sets supported by existing net incidence.
     tradeoffs = []
-    if plans:
+    if plans and not large_admission:
         base_plan = min(plans, key=score); extended = list(base_plan)
         for _ in range(3):
             used_a = {i for i, _ in extended}; used_b = {j for _, j in extended}
@@ -376,7 +405,7 @@ def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_
         evidence['swap_search'] = swaps
         if 'best_score' in swaps:
             evidence.update(method='regional_swaps_v7', stop='bounded_paired_swaps')
-    if evidence.get('method') in ('regional_budgeted_v5', 'regional_omission_v6', 'regional_swaps_v7'):
+    if evidence.get('method') in ('regional_budgeted_v5', 'regional_omission_v6', 'regional_swaps_v7', 'regional_sparse_frontier_v8'):
         evidence['hypotheses'] = []
         for plan in plans:
             error, _ = net_alignment(a, b, plan)
@@ -385,7 +414,8 @@ def match_regional(a, b, *, work_limit=50_000, omission_work_limit=0, swap_work_
                 'endpoint_disagreements': error,
                 'unmatched_leaves': len(a.leaves) + len(b.leaves) - 2 * len(plan),
                 'score': score(plan), 'regions': [], 'coarse_score': None,
-                'frontier_basis': ('paired_discrepancy_beam' if evidence.get('method') == 'regional_swaps_v7'
+                'frontier_basis': ('sparse_consistent_core' if evidence.get('method') == 'regional_sparse_frontier_v8'
+                                   else 'paired_discrepancy_beam' if evidence.get('method') == 'regional_swaps_v7'
                                    else 'omission_exchange_beam' if evidence.get('method') == 'regional_omission_v6'
                                    else 'certified_components' if evidence.get('component_permutation_factors')
                                    else 'net_incidence_beam'),

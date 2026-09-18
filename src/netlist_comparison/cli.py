@@ -78,10 +78,15 @@ Matching, uncertainty and budgets
   Budgets bound named search counters, not total runtime or RAM. --candidate-top-k
   can widen reference retrieval and --max-objects can widen materialized scope.
   In contrast, raising --regional-work-limit alone cannot create a regional frontier
-  after a regional hard-admission failure. No budget proves unique/equivalent results
+  after a regional hard-admission failure. Regional --large-frontier-work-limit
+  50000 opts into sparse partial admission when a view exceeds 128 leaves and
+  no populated map survives: consistent tentative seeds grow a core; terminal
+  conflicts and candidate ties abstain. Final edited proposals do not propagate.
+  Zero (default) disables it. The counter covers seed/candidate checks, excluding
+  preprocessing, validation and reporting. No budget proves unique/equivalent results
   or repairs opaque/missing input and hard interface conflicts. A zero budget
-  only disables controls whose option says so (omission challenges, paired swaps
-  and alternative checks); other numeric limits require at least one. Regional
+  only disables controls whose option says so (omission challenges, paired swaps,
+  sparse admission and alternative checks); other numeric limits require at least one. Regional
   --omission-work-limit searches unmatched participation through occupied
   counterparts; --swap-work-limit challenges existing pairs, including when no
   leaves are unmatched. Both preserve their stated constraints and remain incomplete.
@@ -127,6 +132,7 @@ whole-comparison-scope evidence. Views only filter saved evidence; they do not r
 """
 
 BUDGET_HELP = {
+    "large_frontier_work_limit": "Regional only: opt-in sparse partial admission after no populated map; seed/candidate work budget (try 50000); 0 disables; not a time/RAM cap",
     "omission_work_limit": "Regional only: opt-in occupied-counterpart challenges; full-map score budget (try 512); 0 disables; not a time/RAM cap",
     "swap_work_limit": "Regional only: opt-in paired occupied-counterpart swaps; full-map incidence-score budget; 0 disables; not a time/RAM cap",
     'regional_work_limit': 'Regional candidate/certificate work limit; NOT a time or RAM cap',
@@ -184,7 +190,7 @@ def build_parser():
                         help='Regional only: minimum_raw reduces changed leaf rows within certified whole-component permutations; preserves structural ambiguity (default: existing)')
     defaults = Options()
     for name, help_text in BUDGET_HELP.items():
-        search.add_argument('--' + name.replace('_', '-'), type=integer(0 if name in ('max_alternative_checks', 'omission_work_limit', 'swap_work_limit') else 1),
+        search.add_argument('--' + name.replace('_', '-'), type=integer(0 if name in ('max_alternative_checks', 'omission_work_limit', 'swap_work_limit', 'large_frontier_work_limit') else 1),
                             default=getattr(defaults, name), metavar='N', help=f'{help_text} (default: {getattr(defaults, name)})')
     return parser
 

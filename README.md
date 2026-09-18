@@ -410,3 +410,45 @@ JSON retains `partial_alignment.swap_search` and reconstructible witnesses.
 even with subtree filters; leaf/wiring selections remain separately scoped.
 Names and raw values do not rank swap search; existing certified presentation
 may subsequently choose an incidence-preserving representative.
+
+## Sparse partial admission after a missing regional frontier
+
+The opt-in large-frontier experiment can propose a partial map when regional
+factorization and hierarchy/connectivity frontiers return no populated map:
+
+```bash
+netlist-compare before.canonical after.canonical --format canonical \
+  --black-box-missing --matching-mode regional \
+  --large-frontier-work-limit 50000 --output result.json
+```
+
+Python: `Options(matching_mode="regional", black_box_missing=True,
+large_frontier_work_limit=50000)`. Default zero preserves existing admission;
+this fallback only runs when either view exceeds 128 leaves. It does not raise
+region or dense assignment caps. Locally unique role-WL labels propose tentative
+seeds. Inconsistent terminal maps reject all incident proposals, including
+conflicts on dense/global nets. A sparse, mutually unique neighbour search grows
+an incidence-consistent core for at most 64 rounds. A final proposal needs at
+least two distinct mapped sparse nets and at most one unsupported terminal;
+these completion pairs cannot support further growth. Names and raw values do
+not rank proposals. Matching native type/roles and black-box cell/interface are
+required; this path can abstain on native type changes.
+
+`partial_alignment.large_frontier_search` reports the separate seed/candidate
+work counter, stops, rejected proposals, retained seed/completion paths and unresolved equal-WL
+classes. Equal classes are neither exhaustive candidate sets nor automorphisms.
+Partial rounds are discarded; insufficient budget for the complete seed batch
+admits no seeds. The counter excludes fixed-depth structural preprocessing, validation,
+legacy search and reporting; it is not a whole-call time/RAM cap. Candidate
+retrieval uses degree-limited incidence lists, and large net-overlap validation
+uses sparse optional assignment rather than a dense net product.
+
+On a public, independently renamed and regrouped depth-4→5 control with
+7,037→8,371 black-box leaves, this returns 7,035 tentative pairs, one conditional
+endpoint discrepancy and one localized raw override change; 2/1,336 leaves
+remain unpaired. Existing regional returns zero; anchor growth returns 7,036
+with the same discrepancy/change. This establishes admission and inspection
+utility on that generator, **not better accuracy than anchor growth**. A uniform
+5,000-leaf chain remains mostly unresolved, and a symmetric ring abstains.
+Seed identity, edits outside paired scope and unexplored alternatives remain
+uncertain. See [reproduction, measurements and limitations](docs/large-frontier-experiment.md).

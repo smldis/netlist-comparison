@@ -140,6 +140,7 @@ def apply_partial_report(result,a,b,options):
     if options.matching_mode == "regional":
         from .regional import match_regional
         plans,evidence=match_regional(a,b,work_limit=options.regional_work_limit,
+                                      large_frontier_work_limit=options.large_frontier_work_limit,
                                       omission_work_limit=options.omission_work_limit,
                                       swap_work_limit=options.swap_work_limit)
     else:

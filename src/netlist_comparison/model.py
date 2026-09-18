@@ -23,6 +23,7 @@ class Options:
     regional_work_limit: int = 50_000  # new incidence states/component certificates only
     omission_work_limit: int = 0  # opt-in full-map exchange scores; 0 disables
     swap_work_limit: int = 0  # opt-in full-map paired-swap scores; 0 disables
+    large_frontier_work_limit: int = 0  # opt-in sparse admission; 0 disables
     growth_rounds: int = 64
     context_mode: str = "none"  # v1 reference; opt-in frozen structural context
     context_weight: float = 0.35
@@ -41,6 +42,10 @@ class Options:
     component_presentation: str = "existing"
 
     def __post_init__(self):
+        if type(self.large_frontier_work_limit) is not int or self.large_frontier_work_limit < 0:
+            raise ValueError("large_frontier_work_limit must be a nonnegative integer")
+        if self.large_frontier_work_limit and self.matching_mode != "regional":
+            raise ValueError("large_frontier_work_limit requires matching_mode regional")
         if type(self.omission_work_limit) is not int or self.omission_work_limit < 0:
             raise ValueError("omission_work_limit must be a nonnegative integer")
         if self.omission_work_limit and self.matching_mode != "regional":

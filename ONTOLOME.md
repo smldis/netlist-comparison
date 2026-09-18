@@ -425,3 +425,28 @@ that storage while preserving ordering, without imposing a new hard admission
 limit. Score budgets still do not bound total runtime or memory. Prototype maturity
 is unchanged. A next possibility is a small coupled structural proposal that can
 cross the remaining basin more effectively than leaf transpositions alone.
+
+## Sparse partial admission experiment
+
+The optional `large_frontier_work_limit` now admits a sparse partial hypothesis
+when existing regional decompositions yield no populated map on views above 128
+leaves. This changes only comparison search admission, not canonical objects or
+black-box assumptions. Unique role-WL labels remain tentative proposals; all
+proposals touching a conflicting terminal net map are rejected. Mutually unique
+sparse support grows a consistent core. A final bounded one-terminal completion
+cannot support further growth. No dense leaf assignment is introduced; large
+conditional net-overlap blocks use sparse optional assignment with the same
+maximum-overlap objective. Net-map tie representatives may differ.
+
+Observed on a public renamed, regrouped depth-4→5 7,037→8,371-leaf synthetic:
+7,035 pairs expose the raw override and one conditional endpoint discrepancy,
+with 2/1,336 unpaired paths explicit. The existing regional baseline admits none;
+anchor growth admits one more with the same measured error. A symmetric ring
+abstains and a long uniform chain demonstrates the propagation-radius limit.
+This supports a narrowly useful admission route, not general correspondence
+quality or a replacement for anchor growth. A consistent WL-seeded map can still
+be wrong; selected narrow hints remain conditional and alternatives incomplete.
+Work stops retain complete prior rounds, while hidden internals, incomplete
+expansion and unsupported objects retain their separate scope. Prototype maturity
+is unchanged. The local experiment report records the public evidence and next
+question; representative real-input accuracy remains unmeasured.

@@ -84,3 +84,18 @@ def test_swap_work_limit_is_forwarded_to_options(tmp_path, capsys, monkeypatch):
                  '--swap-work-limit', '512', '--json']) == 0
     json.loads(capsys.readouterr().out)
     assert captured[-1]['swap_work_limit'] == 512
+
+
+def test_large_frontier_option_runs_connected_control(tmp_path, capsys):
+    source = tmp_path / 'chain.sp'
+    source.write_text('\n'.join(f'X{i} n{i} n{i+1} 0 Cell' for i in range(129)))
+    assert main([str(source), str(source), '--black-box-missing', '--matching-mode', 'regional',
+                 '--large-frontier-work-limit', '50000', '--json']) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report['options']['large_frontier_work_limit'] == 50000
+    assert len(report['representative_pair_ids']) == 129
+    assert report['partial_alignment']['large_frontier_search']['work_used'] <= 50000
+    with pytest.raises(SystemExit) as exc:
+        main([str(source), str(source), '--large-frontier-work-limit', '1', '--json'])
+    assert exc.value.code == 2
+    assert 'requires matching_mode regional' in capsys.readouterr().err
