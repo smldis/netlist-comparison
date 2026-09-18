@@ -216,7 +216,7 @@ tree admits an alternate explanation preserving every old device and leaving one
 new 46-leaf region plus a link unmatched, rather than its historical remove-one /
 add-two ledger. All candidate assignments remain conditional.
 
-The [iteration 3 report](../../research-observatory/runs/20260916-comparison-context/iteration3/report.md)
+The iteration 3 report (local research checkout: `research-observatory/runs/20260916-comparison-context/iteration3/report.md`)
 records the before/after sources, failed formal-order controls, comparative
 measurements, budgets, commands, and the next discriminating experiment.
 
@@ -243,7 +243,7 @@ hypothesis sets change under renaming; their completeness is not established.
 The old add-capacitor control retains an extra conditional value finding in one
 alternative because unmatched-object identity is not refined by raw fields.
 
-[Iteration4 evidence and exact commands](../../research-observatory/runs/20260916-comparison-context/iteration4/report.md)
+Iteration4 evidence and exact commands (local research checkout: `research-observatory/runs/20260916-comparison-context/iteration4/report.md`)
 include the frozen failure, follow-up, physical membership, raw findings, timings,
 67 passing tests, unchanged primitive-role checks and explicit fallback limits.
 
@@ -266,5 +266,5 @@ Thus the unmatched scope is partly an objective tradeoff, not just retrieval los
 
 All 88 owning/integration/composition tests pass. Selected large split/merge,
 salted depth-5 scatter and the 45-alternative symmetric ring retain their prior
-incidence/raw/hint results. [Full bounded implementation report](../../research-observatory/runs/20260916-budgeted-comparison/implementation/report.md)
+incidence/raw/hint results. Full bounded implementation report (local research checkout: `research-observatory/runs/20260916-budgeted-comparison/implementation/report.md`)
 contains frozen runtimes, guarded commands, budget stops and preserved failures.

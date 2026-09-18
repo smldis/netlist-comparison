@@ -13,8 +13,14 @@ Evaluation and limitations <evaluation>
 
 ## Start without reading a manual
 
-Run `netlist-compare` for a quick-start guide, or `netlist-compare --help` for
-examples, option explanations and defaults.
+Run `netlist-compare` for a quick-start guide, `netlist-compare --guide` for the
+operator mini-guide, or `netlist-compare --help` for organized options,
+parser-derived choices/defaults and copyable examples. `netlist-compare view
+RESULT --help` is the discoverable reference for saved-result filters. The CLI
+help is maintained with behavior: a new CLI option or exposed matching choice
+must add its purpose, default/choices, incompatibilities and limits there, with
+an entry-point test; prose here supplies deeper rationale rather than a second
+option inventory.
 
 ```bash
 netlist-compare design.sp --inspect
@@ -69,8 +75,19 @@ From the ASS root, after `uv sync --group dev`:
 
 `python -m netlist_comparison` is the same CLI. Select `--format ngspice` for
 ngspice syntax; the default is Eldo. Both files use the selected format. The
-explicit tops can name canonical `TOP` or any declared subcircuit. Do not pass
-rendered canonical tables as input: canonical has no parser for that format.
+explicit tops can name canonical `TOP` or any declared subcircuit. Use `--format canonical` to load saved canonical tables through SPICE Canonical's
+`from_canonical_file`; SPICE/Eldo remains the default. For example:
+
+```bash
+spice-canonical before.sp --external-subcircuits pins.json --output before.canonical
+spice-canonical after.sp --external-subcircuits pins.json --output after.canonical
+netlist-compare before.canonical after.canonical --format canonical --black-box-missing --output result.json
+```
+
+The custom table reader also serves `--inspect` and two-instance comparison. It
+preserves extraction diagnostics and black-box markers without opening original
+sources or includes. Invalid canonical structure is an input error. Pin mapping
+remains extraction configuration, not comparator configuration.
 
 ```python
 from spice_canonical.canonical_netlist import from_file
@@ -108,15 +125,17 @@ wiring-change evidence. Mixed named/positional signatures, inconsistent pin coun
 or named role sets, and definitions available on only one side stay unresolved. A cell
 reference rename is therefore outside this assumption and stays unpaired. Missing
 calls present on only one side can still appear as unpaired, not proven additions.
-When canonical device types are normalized, retained `source_type` supplies the
-original cell reference. Quoted/grouped names in the legacy `unresolved_nets`
-string remain opaque rather than guessing where their net tokens end; supplied
-named connections avoid that limitation.
+Current canonical objects provide explicit `Device.black_box` metadata containing
+original cell identity and pin basis, plus actual token-preserving connections.
+Type normalization preserves this identity. Quoted positional tokens now retain
+their exact boundaries. Older canonical objects still use the compatibility path:
+`source_type` identifies normalized cells and ambiguous quoted/grouped tokens in
+legacy `unresolved_nets` remain opaque rather than being guessed.
 
-Only represented connections and raw overrides are compared. Synthetic
-`unresolved_nets` metadata is retained in each object's `black_box` evidence and
-excluded from override differences, so a net rename does not become a parameter
-change. `scope.black_box_assumption`, each object's `black_box`, and per-side
+Only represented connections and raw overrides are compared. Legacy synthetic
+`unresolved_nets` metadata is retained in black-box evidence and excluded from
+override differences. Current extraction no longer packs nets into a parameter;
+a net rename therefore does not become a parameter change. `scope.black_box_assumption`, each object's `black_box`, and per-side
 `black_box_leaf_count` distinguish comparable boundaries from unavailable
 internals. That count overlaps ordinary disposition counts; it is not another
 disjoint coverage category. Hidden internals remain in `unresolved`, and original
@@ -128,7 +147,8 @@ undefined call itself as a subtree still rejects with `unresolved_definition`:
 there is no available internal circuit to expand. Malformed calls, ambiguous
 primitive syntax and expansion-budget exclusions are not promoted to black boxes.
 Model bodies remain uninterpreted; syntax-defined primitive terminals remain
-usable without model declarations. No parser or canonical format change is needed.
+usable without model declarations. The unchanged-internals assumption remains
+comparator-owned; canonical owns boundary representation and serialization.
 
 ### Report fields
 
@@ -189,8 +209,9 @@ semantics. For example, control-device names can be retained as raw parameters
 without being resolved as graph edges. Canonical diagnostics are preserved even
 when comparison can continue. No diagnostics does not imply complete input.
 
-This adapter follows canonical's SPICE instance-prefix contract: `X` names are
-calls; primitive model types alone do not imply calls. A normalized call uses
+Explicit canonical black-box metadata identifies external calls independently of
+instance spelling. Other calls follow canonical's SPICE instance-prefix contract:
+`X` names are calls; primitive model types alone do not imply calls. A normalized call uses
 its retained `source_type` to find the original definition. Unknown definitions,
 unrepresented connectivity, malformed call bindings, recursion and depth/size
 limits produce opaque or unfinished regions. Duplicate definition/device/pin
@@ -398,7 +419,7 @@ objects have reviewable conditional locations without forcing complete pairing.
 
 `compare_instances(netlist, *, top, path_a, path_b, options=None, scope=None)`
 compares two actual block calls in one full canonical input. See the
-[API/CLI examples and field semantics](../README.md#compare-two-actual-block-calls).
+[API/CLI examples and field semantics](https://github.com/smldis/netlist-comparison#compare-two-actual-block-calls).
 The existing two-input `compare` contract is unchanged. Selection does not create
 or serialize synthetic netlists. Internal port incidence, physical outer-net
 attachments, and conditional pin correspondence are distinct report layers.
@@ -407,8 +428,9 @@ attachments, and conditional pin correspondence are distinct report layers.
 
 Both fixed and regional modes consume the available canonical structure. Missing
 include diagnostics retain their original file/line/path. Unknown X definitions
-remain opaque objects with original occurrence paths, targets, raw positional nets
-(`parameters.unresolved_nets`) and raw parameters. Supplied external signatures
+remain opaque by default, with original occurrence paths, cell targets, positional
+connections and raw overrides (legacy objects may use `parameters.unresolved_nets`).
+`--black-box-missing` opts into their boundary comparison as described above. Supplied external signatures
 retain named/raw/resolved connections but still provide no internals. These objects
 have `coverage.opaque` / opaque dispositions and unresolved regions, with unknown
 hidden leaf counts. They are not paired or labelled unchanged/deleted. Regional
@@ -449,3 +471,254 @@ Small mixed missing-library regression cases retain edited sibling comparisons i
 both modes. Regional repeated-component controls retain 5,000 available pairs plus
 explicit opacity. Fixed matching still has its existing repeated-class limitations;
 missing-library support does not turn ambiguous repeated devices into unique pairs.
+
+## Certified component presentation
+
+Experimental `--component-presentation minimum_raw` (Python:
+`Options(matching_mode="regional", component_presentation="minimum_raw")`)
+refines the representative only inside previously certified whole-component
+permutations. It requires regional mode; the default is `existing`.
+The objective counts paired leaves whose raw type or ordered parameter list
+differs, not electrical importance, numeric parameter distance or historical edits.
+No raw values seed structural correspondence or rank competing leaf hypotheses.
+
+Each admitted coordinate solves an assignment of entire component vectors.
+Equal raw vectors cancel first: Hamming distance obeys the triangle inequality,
+so this preserves a minimum for that coordinate. At most 256 residual components
+enter one assignment; larger residual factors are skipped whole. Two alternating
+A/B sweeps accept strict improvements only. Each coordinate is optimal with the
+others fixed, but the joint result need not be. Only fully paired components
+participate; unmatched objects and partially paired components remain untouched.
+The guard bounds these matrices, not whole-process time or RAM. This work is
+separate from `regional_work_limit`; elapsed time and skipped factors are recorded.
+
+`representative_selection.components` records before/after changed-pair counts
+per retained hypothesis, accepted factor permutations (indices into the unchanged
+`partial_alignment.component_permutation_factors`), guards and elapsed seconds.
+Assignments exchange complete slot vectors, preserving matched object sets and
+represented role incidence. Structural factors and inspection regions are retained;
+equal raw values never resolve their ambiguity. Defaults, call overrides and hidden
+internals are outside this leaf-presentation objective and retain their prior scope.
+
+`representative_profile_imbalances` counts unequal raw-profile populations in
+fully paired A-factor slots of the final representative. Each surplus lists **all**
+paths carrying that profile; it does not select which occurrence historically
+changed. The count is a lower bound on differing pairs within that slot and
+partner population, not an independent edit count or a whole-design finding.
+Balanced slot populations can still require changed pairs when slots must move
+together. B-only factors and unmatched leaves are outside this inventory.
+
+`representative_wiring_witness` retains one maximum-overlap net bijection and
+its disagreeing endpoint paths/roles. It is conditional on the selected leaf map;
+net-map ties are not enumerated and may move the displayed witness. The complete
+partition tables remain authoritative raw evidence. Selected-instance witnesses
+use the same internal formal-port view as matching; outer attachments remain in
+`boundary` and the existing physical-net fields. This report is not an electrical
+equivalence test, historical edit reconstruction or complete ambiguity solver.
+Saved-result views preserve all these fields in `context.representative_selection`.
+
+The known 240-leaf external-cell example improves from 31 to 1 raw-change rows,
+with unchanged complete pairing, one endpoint disagreement and broad structural
+ambiguity. A 5,000-leaf repeated-motif stress improves from 2,447 to 1; this is a
+resource test, not representative analog validation. Public TIA controls expose
+unchanged residual noise and rename sensitivity; connected admission failures
+remain. The ASS research checkout retains the evaluation report at
+`research-observatory/runs/20260916-practical-comparison/implementation/report.md`
+(outside this package’s documentation tree).
+
+## Parameter-optional saved views
+
+Use `netlist-compare view result.json --omit-parameters --group-depth 2 --text`
+or `project_saved_report(report, omit_parameters=True, group_depth=2)` to begin
+with represented structure. This is a pure saved-report projection; it neither
+rematches nor minimizes raw differences. `--parameter NAME` and
+`--omit-parameters` are mutually exclusive. Keep the default categories to retain
+raw type/reference, wiring and unpaired findings together; explicit `--category`
+selectors still narrow the requested output.
+
+The filter removes `parameters.*` raw differences, including `$order`, **except**
+these exact canonical reference/raw-evidence names: `model`, `source_type`,
+`control`, `inductor1`, `inductor2`, `raw`, `unresolved_nets`. Their storage in a
+parameter list does not make them sizing information. `type` and any other
+non-parameter raw fields remain. This is an explicit field policy, not inferred
+functional importance: an omitted override could affect hidden architecture.
+Changed external cell references that matching cannot pair remain unpaired, with
+original cell identities in `source_scope.black_box_objects`; the view invents no
+paired cell-change finding.
+
+Mixed rows retain their surviving fields; parameter-only rows disappear from
+`findings.raw_pairs`. `filters.omit_parameters` and
+`counts.parameter_fields_suppressed_in_path_scope` record the choice and suppressed
+field count. Existing raw pair/field total/shown/hidden counts remain relative to
+the full source report. The full pair evidence, defaults and call overrides remain
+unfiltered in `context`; defaults/overrides are explicitly not counted or displayed
+as leaf findings. They are not evaluated. The source report is never mutated.
+
+Source diagnostics, opaque/unresolved scope, black-box assumptions, alternatives,
+and conditional hierarchy memberships remain. With `--omit-parameters` and
+`--group-depth`, text includes groups even when they have no selected leaf findings;
+this lets hierarchy-only relocation stay inspectable. Paths and membership counts
+are not proof of split, merge, redesign or historical identity. Text `--limit`
+remains a preview bound and reports omitted group counts.
+
+If a full report contains a `representative_wiring_witness`, saved views now copy
+its endpoint rows into `findings.endpoint_witnesses`, under the wiring category and
+the same either-side path selection. `counts.endpoint_witnesses` records
+full/shown/hidden rows; groups include their `endpoint_witnesses` count. Ungrouped
+text displays both schematic paths and the role. Original net-map scope and ties
+remain in context. These witnesses and partition rows overlap; their counts are
+not additive edits. Old reports without this optional evidence produce no witness
+rows, rather than rerunning a solver.
+
+Example hierarchy-only inspection, without parameter rows:
+
+```sh
+netlist-compare view C_regroup-regional.json --under-a CTDSM_TOP/xi20 \
+  --omit-parameters --group-depth 2 --text
+```
+
+On the public development case this retains `xi20 -> xi20` (26 paired leaves) and
+`xi20 -> xi20/XRC` (10), despite zero raw/wiring findings. The independently renamed
+combined ADC case still has 21 selected-map endpoint disagreements versus one in a
+known authored map: parameter suppression does not repair that correspondence.
+
+## File roots and declared subcircuits
+
+The synthetic file root is a selectable comparison scope, not a declared
+implementation of an X call. Expansion and black-box reconciliation now consult
+only actual subcircuit declarations when deciding whether a cell is available.
+A missing cell named `TOP` therefore remains a comparable black-box boundary when
+the file root is named `TOP`; selecting its unavailable internals still rejects.
+
+Canonical permits a file root and a declared subcircuit to share a name. The
+comparator's current name-keyed catalogs cannot represent both without ambiguity;
+comparison explicitly rejects this valid input and requests a file-root rename.
+It does not silently choose either circuit or relabel paths. A caller can make
+that choice before comparison without changing the declared subcircuit or calls:
+
+```python
+from dataclasses import replace
+from spice_canonical.canonical_netlist import from_canonical_file
+
+netlist = from_canonical_file("same-name.canonical")
+netlist = replace(netlist, top=replace(netlist.top, name="FILE_ROOT"))
+# Choose top_a/top_b="FILE_ROOT" for file contents, or "TOP" for SUBCKT TOP.
+# netlist.render() saves this explicit naming choice for the CLI if desired.
+```
+
+Choose a file-root name absent from the declarations. File-root occurrence paths
+then use the chosen name; source subcircuit/call names are unchanged. Actual
+duplicate subcircuit definitions remain invalid. Namespace-qualified catalog IDs
+would be a separate contract change, not a hidden consequence of `--top`.
+
+## Occupied omission challenges and represented population
+
+`Options(matching_mode="regional", omission_work_limit=512)` /
+`--matching-mode regional --omission-work-limit 512` opt into an additional
+omission-seeded beam. Default 0 disables it. This revises the former unused-only
+completion boundary: an unused leaf can displace an occupied compatible partner,
+then the released leaf can compete again across hierarchy. Adding an unused pair
+is also allowed. Full role-incidence disagreement plus 0.6 per omitted leaf judges
+every complete injective candidate; names, values and fixed retrieval distance
+are not candidate admission rules. External identities/interfaces stay hard.
+
+The score budget includes seeds. Fixed limits: width 12, depth 3, 64 supported
+initial omissions, 32 best-score output hypotheses. Worse intermediate states can
+survive the beam. Equal-score output prioritizes distinct omission sets. Better
+scores replace worse primary hypotheses; ties preserve the previous representative
+when retained. Exact twin/certified component presentation follows this search.
+Full-map score cost depends on circuit size, and stored states cost up to
+O(score budget × paired inventory); this is not a wall-time or RAM cap. No
+populated seed is an admission limitation, not an additions finding.
+
+`partial_alignment.omission_search` is the evidence contract:
+
+- `stop`, `work_used`, `work_limit`, `rounds`, `beam_pruned`, `seeds_truncated`,
+  `alternatives_truncated` and fixed limits disclose bounded coverage.
+- `baseline_score`, `best_score` and endpoint counts describe this search before
+  incidence-preserving presentation. `baseline_pairs` reconstructs the incumbent.
+- `witnesses` contain coupled removed/added pairs for retained best-score maps.
+  `baseline_tied_exchanges` preserve changed-omission baseline ties even if a
+  later improvement supersedes them; `baseline_ties_truncated` bounds this list.
+- Each initially omitted supported object's `challenges` record gives compatible
+  and occupied candidate counts, best sampled participating/omitted scores and
+  their difference (participation minus omission). Missing participation produces
+  null, never infinite confidence. `participating_witness` reconstructs the best
+  sampled forced-participation explanation. These diagnostic maps need not be
+  primary alternatives. All deltas apply to `baseline_pairs` jointly.
+
+Search considers omission-seeded additions/exchanges, not arbitrary full-coverage
+swaps or deletion moves. Beam order, depth, retained alternatives and opaque scope
+remain limitations. No exhaustive-search, history or calibrated-probability claim.
+
+`population_evidence` is always included in regional reports. Unequal counts in
+hard-compatible represented domains give a joint lower bound on selected-map
+omissions, independently of individual ambiguity. Native primitives form one
+domain because type changes are admissible; external domains use stable cell and
+interface. Opaque leaves are excluded and separately counted; expansion status
+qualifies the materialized inventory. Bounded path examples are inspection aids,
+not an exact new-instance list. These are population observations, not edit events.
+
+Saved projections keep population and search evidence in full context. Selecting
+`unpaired` also exposes `findings.population_groups` and `findings.omission_search`,
+with separate `counts.population_groups`. These carry **unfiltered whole-scope**
+evidence even under path filters; per-object raw/wiring/unpaired counts retain
+their previous semantics. The text preview labels this scope and shows coupled
+path exchanges and conditional margins. Selecting other categories hides these
+findings but retains their context. A symmetric 2→3 population can therefore
+show zero unpaired object rows and still visibly report represented surplus one.
+
+## Challenge already paired counterparts
+
+`Options(matching_mode="regional", swap_work_limit=512)` /
+`--matching-mode regional --swap-work-limit 512` enables a bounded swap stage
+following regional alignment and optional omission search. Zero disables it;
+existing defaults remain unchanged. This can challenge a wrong correspondence
+inside a fully paired compatible class, which omission-seeded search cannot reach.
+
+A width-12 best-first beam explores occupied-counterpart transpositions to depth
+8. At least one swapped pair has a represented terminal discrepancy under the
+current optimal net map; all compatible occupied counterparts compete for a
+32-proposal shortlist per expansion. Conditional fixed-net-map mismatch orders
+proposals, while freshly optimized **full represented terminal incidence plus
+0.6 per omitted leaf** ranks every admitted complete map. Worse intermediate
+states can survive. Native type changes remain admissible; external cell/interface
+compatibility and injectivity remain hard. Names and raw parameters do not rank
+this search. Every swap preserves both matched sets of its originating seed.
+Different incoming alternatives may already have different matched sets.
+
+`partial_alignment.swap_search` records counted full-map scores (including seeds),
+cheap proposal comparisons separately, beam/branch/depth/output pruning, scores,
+runtime and reconstructible path witnesses. `baseline_pairs` plus a witness's
+removed/added pairs reconstruct its map; `seed_index` indexes `seed_pairs` and
+identifies its originating incoming alternative. A difference in inventory
+between seeds is not an inventory change caused by a swap. Score trajectories
+start at that seed. Up to 32 equal best maps survive; the previous representative
+survives ties when it remains best. All alternatives remain incomplete and
+conditional. Earlier `omission_search` selection describes the preceding stage;
+it need not describe the final representative after swaps. Existing twin/factor
+presentation can subsequently choose an incidence-preserving representative.
+
+Streaming top-32 proposal retention uses linear active-pair context and bounded
+proposal storage, without a quadratic candidate list or deduplication set. Cheap
+proposal enumeration can still take quadratic time, and evaluated maps/net maps
+can consume memory proportional to budget times inventory. The score budget is
+not a whole-call time/RAM bound. Missing incumbents abstain explicitly. Truncated
+branches, finite beam/depth, discrepancy admission and traversal order can miss
+better maps. No global QAP enumeration, exhaustive symmetry, calibrated confidence,
+unique historical identity or optimality is claimed.
+
+Observed on the validated renamed public mutation: 12 endpoint discrepancies
+without omission search, 10 with omission512, 6 with omission512+swap512; 285 pairs
+and both matched sets remain fixed during the swap stage. Swap-only512 also reaches
+6. A 2,048-score swap probe still misses the known feasible two-discrepancy witness.
+Public redesign stays at one after omission search; original combined stays at
+two. A six-object all-paired control crosses 3→5→0; a fresh five-object full-coverage
+edit/permutation improves 5→1. These are development controls, not representative
+workplace accuracy or recovery of unique edit history. Connected129 still lacks
+an admitted regional incumbent.
+
+In saved views, the wiring category retains this whole-comparison search evidence
+and displays bounded path witnesses. Subtree filters still select leaf findings;
+search context remains explicitly unfiltered. Run `netlist-compare --guide`,
+`--help`, and `view --help` for current workflows, controls and examples.

@@ -20,8 +20,13 @@ Output is structured JSON; names are labels, not inferred circuit functions.
 
 ## Start without reading a manual
 
-Run `netlist-compare` for a quick-start guide, or `netlist-compare --help` for
-examples, option explanations and defaults.
+Run `netlist-compare` for a quick-start guide, `netlist-compare --guide` for the
+operator mini-guide, or `netlist-compare --help` for organized options and
+parser-derived defaults. `netlist-compare view RESULT --help` documents the
+saved-report filters. CLI help is maintained with behavior: each exposed option
+or matching choice needs its purpose, default/choices, incompatibilities and
+limits in help plus an entry-point check; this README explains the deeper contract
+instead of duplicating a hand-maintained option list.
 
 ```bash
 netlist-compare design.sp --inspect
@@ -48,6 +53,7 @@ hierarchy/regrouping matcher. No interactive prompts are required.
 ```bash
 netlist-compare view result.json --under-a TOP/XOLD --category raw --text
 netlist-compare view result.json --under-b TOP/XMOVED --category wiring --output focused.view.json
+netlist-compare view result.json --omit-parameters --group-depth 2 --text
 netlist-compare view result.json --parameter W --group-depth 1 --json
 ```
 
@@ -66,13 +72,24 @@ covers representative leaf-pair raw fields. `--parameter NAME` selects only
 Definition defaults and call overrides remain unfiltered in `context.hierarchy`.
 Expressions are not evaluated.
 
+For an architecture-first inspection, `--omit-parameters` hides parameter-only
+leaf findings while retaining type changes and exact canonical model/type and
+connectivity-reference fields. It is mutually exclusive with `--parameter`.
+Python: `project_saved_report(report, omit_parameters=True, group_depth=2)`.
+With the default categories, wiring, conditional endpoint witnesses (when saved),
+unpaired objects and source limitations remain visible. Hidden counts are explicit;
+all original parameter/default/override values remain in the full JSON context.
+This filter does not improve matching or identify redesign/split/merge events.
+
 `--group-depth N` collapses text to finding counts by occurrence at depth N
 relative to each selected comparison root, including selected-instance roots.
 A shallow branch uses its closest available ancestor. JSON still retains all
 selected leaf rows. Group counts show scoped representative pairs, shown raw
 changed pairs, shown unpaired objects per side, and shown wiring partition rows
 touching that group. A wiring row can touch several groups, so those counts do
-not sum to independent wiring edits. Text omits groups with no selected findings;
+not sum to independent wiring edits. With `--omit-parameters`, text also shows
+conditional membership groups without leaf findings, preserving hierarchy-only
+inspection routes. Otherwise text omits groups with no selected findings;
 JSON retains those groups as context. Category total/shown/
 hidden counts refer to raw edited pairs, wiring partition rows, and unpaired/
 unresolved/opaque object rows. These are different record kinds, not independent
@@ -90,6 +107,27 @@ Empty findings mean only none selected. Unpaired or opaque objects are not
 proven additions or deletions; filtering cannot recover unexplored candidates.
 Text wiring rows show A/B instance paths and terminal roles for bounded
 endpoint previews, including roles containing colons.
+
+## Extract once with SPICE Canonical
+
+Pin mapping and library boundaries belong to the extractor:
+
+```bash
+spice-canonical before.sp --external-subcircuits pins.json --output before.canonical
+spice-canonical after.sp --external-subcircuits pins.json --output after.canonical
+netlist-compare before.canonical after.canonical --format canonical --black-box-missing --matching-mode regional --output result.json
+```
+
+`pins.json` maps actual cell names to pin names in call order, for example
+`{"nmos_lvt": ["d", "g", "s", "b"], "res_cell": ["p", "n"]}`.
+Without a mapping, canonical preserves positional terminals. Both artifacts use
+SPICE Canonical's custom table syntax, not JSON. The comparator delegates loading
+to `spice_canonical.canonical_netlist.from_canonical_file`; original SPICE files
+and libraries need not be available. `--inspect` and two-instance comparison also
+accept `--format canonical`. Extraction warnings, defaults, overrides and explicit
+black-box interfaces survive. This requires the canonical-text reader revision of
+`spice-canonical`; the earlier pinned BJT-only revision does not provide it.
+The matching algorithms and their regional admission limits are unchanged.
 
 ## Development history
 
@@ -120,7 +158,7 @@ Use sibling checkouts to reproduce the reviewed dependency state:
 
 ```bash
 git clone https://github.com/smldis/spice-canonical.git
-git -C spice-canonical checkout dcf9dfb4e85f4d87fac5fa8e9f410c20759188ed
+git -C spice-canonical checkout 7452879264d4b1b5d86b5a12734a4b7fa413e02c
 git clone https://github.com/smldis/netlist-comparison.git
 cd netlist-comparison
 python -m venv .venv
@@ -131,12 +169,15 @@ netlist-compare examples/before.sp examples/after.sp --top-a TOP --top-b TOP \
   --output comparison.json
 ```
 
-The pinned canonical revision adds the reviewed ambiguous-BJT correction in
-[canonical PR #2](https://github.com/smldis/spice-canonical/pull/2).
-Older canonical revisions can supply guessed BJT
-terminals and will fail those regression tests. NumPy and SciPy are declared
-runtime dependencies. No simulator or private netlist is required for the tests.
-The full ASS validation passed 196 canonical, comparator and integration tests.
+Replace the checkout placeholder with the commit that publishes the canonical-text
+reader and explicit black-box boundaries before using these instructions. The
+earlier [canonical PR #2](https://github.com/smldis/spice-canonical/pull/2)
+introduced the ambiguous-BJT correction, but does not include this reader. Both
+repositories currently declare prototype version `0.1.0`, so a version-only
+dependency constraint does not identify the compatible revision. NumPy and SciPy
+are declared runtime dependencies. No simulator or private netlist is required
+for the tests. Root review of the composed ASS source passed 342 tests; this is
+not workplace validation.
 
 License: [Apache-2.0](LICENSE), matching the other ASS components.
 
@@ -203,7 +244,7 @@ Positive evidence includes thousands of leaves at depth4–5, branches/cycles,
 unequal interfaces, arbitrary allocations across new sibling blocks and merged
 blocks. Passive-only, dense and oversized components remain limitations. See
 [the result contract](docs/index.md#regional-graph-checkpoint) and
-[iteration4 evidence](../research-observatory/runs/20260916-comparison-context/iteration4/report.md).
+iteration4 evidence (local research checkout: `research-observatory/runs/20260916-comparison-context/iteration4/report.md`).
 
 ## Budgeted incidence and repeated components
 
@@ -227,8 +268,34 @@ and native calls are outside this counter. Use external process limits for those
 `partial_alignment.coverage_tradeoffs` separately exposes supported completions
 that the normal omission cost disfavors; they are not primary hypotheses.
 
-[Budgeted iteration evidence](../research-observatory/runs/20260916-budgeted-comparison/implementation/report.md)
+Budgeted iteration evidence (local research checkout: `research-observatory/runs/20260916-budgeted-comparison/implementation/report.md`)
 records timings, resource guards, failed development controls and remaining limits.
+
+## Reduce certified permutation noise
+
+To reduce raw-change noise from arbitrary **certified whole-component**
+permutations, try the opt-in regional presentation experiment:
+
+```bash
+netlist-compare before.canonical after.canonical --format canonical \
+  --black-box-missing --matching-mode regional \
+  --component-presentation minimum_raw --output result.json
+```
+
+`Options(matching_mode="regional", component_presentation="minimum_raw")` uses
+raw type/parameter lists to reduce changed leaf rows within existing structural
+factors. It preserves all factors, matched sets and terminal incidence. This is
+a less noisy representative, not a unique counterpart or an edit-history claim.
+The full report retains raw-profile population imbalances and a conditional
+endpoint inspection witness with paths on both sides. Two bounded factor sweeps
+do not guarantee a joint optimum. Default behavior stays unchanged.
+
+On the known 240-leaf external-cell edit, raw-change rows fall from 31 to 1
+while the one endpoint discrepancy remains; structural old-side ambiguity still
+spans 20 leaves. The public TIA self-comparison still has four noisy raw rows,
+and the connected 144-leaf admission failure still has no pairs. See
+[the experiment contract](docs/index.md#certified-component-presentation) and
+bounded evaluation (local research checkout: `research-observatory/runs/20260916-practical-comparison/implementation/report.md`).
 
 ## Compare two actual block calls
 
@@ -272,3 +339,74 @@ joint pin bijection. Incidence conflicts are reported within each factor; combin
 factors requires checking their shared pin constraints. Symmetry/twin inspection
 regions remain attached; no exhaustive pin mapping or numeric parameter equivalence
 is claimed. Default matching remains `fixed`; `regional` is opt-in.
+
+## Challenge selected omissions
+
+```bash
+netlist-compare before.canonical after.canonical --format canonical \
+  --black-box-missing --matching-mode regional --omission-work-limit 512 \
+  --output result.json
+netlist-compare view result.json --category unpaired --text
+```
+
+Python: `Options(matching_mode="regional", omission_work_limit=512)`. Zero
+(the default) disables this additional search. An omitted supported leaf can
+claim a compatible **occupied** counterpart across hierarchy, releasing its old
+partner for another exchange. A width-12 beam takes at most three steps, ranks
+complete injective maps by full terminal incidence plus 0.6 per omitted leaf,
+and can traverse worse intermediate states. It adopts improvements and retains
+up to 32 best-score alternatives, preferring different omission identities.
+Cell identity/interface constraints remain hard; names and raw values do not rank
+search. Existing certified/twin presentation may subsequently choose a raw-aware
+representative without changing incidence or omitted sets.
+
+`partial_alignment.omission_search` records termination, scored work, pruning,
+conditional participation-versus-omission margins and coupled path exchanges.
+`baseline_pairs` plus each witness's removed/added pairs reconstruct its complete
+map. Baseline-score ties and best sampled participation witnesses are diagnostic;
+they may be worse than a newly improved primary hypothesis. They are not silently
+promoted into primary alternatives. Margins concern sampled maps only.
+
+The budget counts full-map scores, including admitted seeds. Runtime scales with
+represented incidence and candidate competition; memory can scale with budget
+times paired inventory. It does **not** cap whole-call runtime/RAM. No populated
+incumbent, no supported omission, or more than 64 supported omissions causes
+explicit abstention. Depth, beam, seed/output truncation and iteration order limit
+coverage. Full-coverage permutations and deletion moves are outside this search;
+no global optimum, exhaustive search or calibrated probability is claimed.
+
+Regional reports also include `population_evidence` without enabling search:
+counts in hard-compatible represented domains, joint surplus and selected omission
+counts. Native primitives share one domain (native type changes remain allowed);
+external domains require the same cell/interface. Opaque objects are excluded
+and counted separately. Incomplete expansion limits counts to materialized scope.
+An unchanged unmatched 129-leaf graph has no population surplus. Two identical
+external occurrences versus three have surplus one even when every occurrence
+has a possible counterpart. Neither identifies an exact historical new instance.
+
+Saved `--category unpaired` views show population groups and exchange evidence
+**for the whole comparison scope**, explicitly unfiltered even with subtree
+selectors. Per-object unpaired counts keep their existing meaning; population
+counts are separate and survive when every per-object disposition is ambiguous.
+Other category selections retain this evidence in unfiltered JSON context.
+
+## Refine already paired counterparts
+
+Use `--matching-mode regional --swap-work-limit 512` to try bounded swaps among
+already paired objects, including fully paired compatible classes. It runs after
+optional omission search. Python: `Options(matching_mode="regional",
+swap_work_limit=512)`. Zero disables it; default matching remains unchanged.
+
+Full represented terminal incidence ranks complete maps. Swaps preserve each
+incoming seed's matched objects; external cell/interface compatibility remains
+hard. Different seeds can already omit different objects. The score budget is
+not a time/RAM cap. Branch/beam/depth limits and traversal order can miss better
+maps: the renamed public control improves from 10 to 6 discrepancies after
+omission search, while a feasible 2 remains missed. See `--guide` for choosing
+between omission search, swaps, certified presentation and saved-view filtering.
+
+JSON retains `partial_alignment.swap_search` and reconstructible witnesses.
+`view --category wiring --text` shows swap evidence for the whole comparison scope
+even with subtree filters; leaf/wiring selections remain separately scoped.
+Names and raw values do not rank swap search; existing certified presentation
+may subsequently choose an incidence-preserving representative.

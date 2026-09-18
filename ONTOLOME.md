@@ -29,6 +29,11 @@ not establish workplace accuracy or inspection benefit.
   retain high-degree nets and body terminals in the report.
 - Provide a Python API and headless CLI with complete JSON evidence and bounded,
   deterministic terminal previews. Compact data remains the primary artifact.
+- Keep the CLI independently discoverable: parser help and the built-in operator
+  mini-guide describe exposed choices, defaults, incompatibilities and limits;
+  focused entry-point tests keep that presentation tied to runnable behavior.
+  Regional omission and paired-swap score budgets are explicitly opt-in and do
+  not turn bounded candidate exploration into a correspondence verdict.
 
 ## Boundaries and possibilities
 
@@ -169,9 +174,9 @@ passive-only, densely coupled or oversized cores. Arbitrary input regrouping is
 not generally solved. Physical split/merge has positive evidence within this
 supported domain, not merely for empty wrappers. Body/supply and all primitive
 roles remain in final validation even when search suppresses particular nets.
-Prototype maturity is unchanged. The [iteration4 report](../research-observatory/runs/20260916-comparison-context/iteration4/report.md)
+Prototype maturity is unchanged. The iteration4 report (local research checkout: `research-observatory/runs/20260916-comparison-context/iteration4/report.md`)
 records preserved failures, before/after results, honest fallback and the next
-boundary test; [iteration3](../research-observatory/runs/20260916-comparison-context/iteration3/report.md)
+boundary test; iteration3 (local research checkout: `research-observatory/runs/20260916-comparison-context/iteration3/report.md`)
 remains the historical graph/interface checkpoint.
 
 ## Actual occurrence boundaries
@@ -252,10 +257,11 @@ maturity is unchanged.
 
 User experience showed that preserving known circuitry beside opaque calls is
 insufficient when most leaves come from unavailable libraries. Opt-in
-`black_box_missing` adopts a boundary-only interpretation of the existing canonical
-call evidence: ordered retained nets become positional terminals, or supplied
-named terminals remain named, and instance overrides stay raw. This is comparator
-policy, not extraction or inferred formal names. Same cell reference and compatible
+`black_box_missing` adopts a boundary-only comparison of explicit canonical
+black-box interfaces: original cell identity, named or positional terminals and
+raw instance overrides. Extraction now owns token boundaries and marker metadata;
+the earlier joined-net interpretation survives only for legacy canonical objects.
+This comparison assumption is consumer policy, not inferred formal names. Same cell reference and compatible
 interface are hard correspondence constraints under an explicit assumption of
 unchanged internals and stable terminal identity. Incompatible interfaces and
 one-sided definitions abstain; malformed primitives and budgets remain opaque.
@@ -310,3 +316,112 @@ hierarchy context rather than counted as leaf raw findings. A view cannot
 recover unexplored alternatives or establish equivalence from an empty
 selection. This is an inspection capability in the existing prototype, not a
 maturity change or a new claim about matching accuracy.
+
+## Canonical file consumption
+
+User experience exposed that a direct Python dependency was insufficient for a
+reusable extraction workflow. `--format canonical` now delegates custom-table
+loading to the owning canonical reader. Extraction configuration is not duplicated
+here; saved diagnostics, defaults and explicit external interfaces enter the same
+comparison API used by SPICE inputs. The canonical reader checks artifact structure;
+comparison still decides what to assume about unavailable internals. This changes
+the input boundary, not regional admission limits or prototype maturity.
+
+## Whole-component representative experience
+
+The external-cell trials exposed a distinction between structural ambiguity and
+avoidable presentation noise: a certified permutation can explain one width edit
+with 31 raw-change rows. The opt-in `component_presentation="minimum_raw"`
+experiment extends raw-aware representative choice from terminal twins to whole
+certified components. It uses bounded coordinate assignments, preserves matched
+sets/incidence and every structural factor, and leaves the default unchanged.
+Raw values choose a readable representative without establishing identities.
+
+Population imbalances in paired component slots are separate raw facts conditional
+on partner sets. A concise wiring witness is likewise conditional on one leaf/net
+map; net-map ties can relocate it. This separation helps an operator use both
+schematic paths without converting a selected permutation into an established edit.
+Observed: 31 raw rows become one on the known 240-leaf external-cell edit, and
+2,447 become one on a 5,000-leaf repeated resource stress, retaining the single
+endpoint discrepancy. These are synthetic results. Public TIA self-comparison
+still produces four noisy raw rows; rename sensitivity, connected admission and
+broad structural ambiguity remain. This revises presentation inside certified
+symmetries, not correspondence admission or prototype maturity. A general useful
+analog-difference result remains unestablished.
+
+## Architecture-first inspection and input namespaces
+
+User experience adds a practical distinction: a redesign or reorganization may
+need inspection before sizing details matter. The saved-view `omit_parameters`
+option suppresses ordinary parameter differences while retaining raw type and
+canonical reference fields, connectivity, conditional hierarchy membership and
+unavailable scope. Parameter-list storage is not itself evidence that a field is
+sizing: model/type and connectivity references remain. Defaults and call overrides
+remain explicit unfiltered context, outside displayed leaf findings. Grouped text
+retains membership even without leaf differences, and saved endpoint witnesses
+can be viewed without parameter rows. No functional taxonomy or event inference
+is adopted; this changes projection, not correspondence.
+
+Observed: the public hierarchy-only case exposes 26 leaves remaining under xi20
+and 10 paired into xi20/XRC. The renamed combined case still selects a 21-endpoint
+alignment where an authored alignment has one discrepancy. Filtering its six
+parameter rows leaves the 39 partition rows and 21 conditional witnesses intact;
+this is an unresolved matching failure, not successful architecture localization.
+
+Root integration review also showed that a synthetic file root was wrongly
+counted as an available missing-cell implementation. Only declared subcircuits
+now serve call lookup and availability checks. A file-root/subcircuit name
+collision is valid canonical input but exceeds the current name-keyed report
+catalog: comparison explicitly requires the caller to rename the file root,
+without changing subcircuit identities or silently selecting a scope. General
+namespace-qualified catalogs remain a possible later boundary revision. Prototype
+maturity and the certified-only raw-minimization boundary are unchanged.
+
+## Challenging selected omissions
+
+Experience exposed a boundary error in unused-only regional completion: an omitted
+leaf can have plausible counterparts that are all occupied. The adopted opt-in
+`omission_work_limit` search reopens those assignments across hierarchy using an
+omission-seeded beam. Full role incidence judges complete injective maps, including
+worse intermediate steps; external identities/interfaces remain hard constraints.
+Improving maps replace worse primary proposals. Best-score alternatives prioritize
+different omission identities, while superseded baseline ties and forced-participation
+witnesses remain separately labelled diagnostic evidence. Canonical extraction and
+its cross-unit interface are unchanged; prototype maturity remains unchanged.
+
+Population evidence is now a separate regional reporting commitment. Materialized
+counts in hard-compatible domains can establish a joint surplus even when every
+member has a possible counterpart. Opaque scope and incomplete expansion qualify
+these counts. Search failure or an individual omission never becomes a historical
+addition claim. Saved views preserve and explicitly label whole-scope population
+and exchange context separately from filtered per-object dispositions.
+
+Observed in the bounded public controls: redesign improves three endpoint
+discrepancies to one with 285 pairs; combined remains at two. The equal-score
+baseline omission exchange remains inspectable, but does not establish optimality.
+The unchanged connected129 admission failure remains zero matched under regional
+mode and has no population surplus. This supports reopening occupied competition,
+not general correspondence accuracy. Fixed depth/beam, score/output budgets,
+order sensitivity, missing full-coverage swaps and opaque scope remain explicit.
+Conditional participation margins describe evaluated hypotheses, never probabilities.
+
+## Paired discrepancy experiment
+
+The regional prototype now separately tests occupied-counterpart swaps, explicitly
+revising the search move boundary that required an omitted seed. A bounded beam
+can use a worse intermediate map to improve fully paired compatible classes.
+Matched sets remain fixed within each swap sequence; incoming seeds and conditional
+alternatives remain distinct. Full represented incidence is the final objective;
+external compatibility, injectivity and absence of name/raw-parameter search rank
+remain commitments. Existing representative presentation is a separate operation.
+
+The renamed public case improves from ten to six discrepancies after omission
+search, while a known feasible two remains missed even at four times the swap
+budget. A controlled strict local minimum resolves through an uphill step. This
+supports the usefulness of the new move without establishing adequate basin
+exploration or representative analog accuracy. Root review also exposed quadratic
+proposal storage despite a small score budget; streaming bounded selection removes
+that storage while preserving ordering, without imposing a new hard admission
+limit. Score budgets still do not bound total runtime or memory. Prototype maturity
+is unchanged. A next possibility is a small coupled structural proposal that can
+cross the remaining basin more effectively than leaf transpositions alone.

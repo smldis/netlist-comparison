@@ -9,6 +9,11 @@ from spice_canonical.canonical_netlist import Connection
 
 def represent(device):
     """Use retained call evidence; never infer formal names or hidden devices."""
+    boundary = getattr(device, 'black_box', None)
+    if boundary is not None:
+        return device, {'cell': boundary.cell, 'pin_basis': boundary.pin_basis,
+                        'internals': 'unavailable', 'retained_unresolved_nets': []}
+    # Compatibility for canonical objects produced before explicit boundaries.
     raw = [p for p in device.parameters if p.name.casefold() == 'unresolved_nets']
     if device.type.casefold() == 'unresolved':
         return device, None
@@ -45,7 +50,7 @@ def compatible(a, b):
 def reconcile(a, b):
     """Reject contradictory interfaces rather than treating changed arity as pins."""
     interfaces = defaultdict(set)
-    defined = {name.casefold() for view in (a, b) for name in view.definitions}
+    defined = {name.casefold() for view in (a, b) for name in view.declared_subcircuits}
     for view in (a, b):
         for leaf in view.leaves:
             if leaf.black_box:
