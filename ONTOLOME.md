@@ -500,3 +500,17 @@ locations: overlap grouping, complete support charging and private correspondenc
 remain separate questions. Phase/model/RSS diagnostics make that hypothesis
 inspectable. Exact objectives, proof prerequisites and unresolved identity remain
 unchanged; new capacity is not a new correspondence claim.
+
+## Explicit sequential batch preparation
+
+Repeated supplied-window scans exposed a boundary mismatch: immutable full-input
+identity and full-top exterior incidence were being reconstructed for every
+window even though their inputs, tops, scope and options were fixed. An explicit
+batch API now owns that reuse inside one bounded worker. It has no process-global
+state. Each window still constructs a fresh selected view, anonymous graph,
+admission record, evidence lanes and exact proof, and yields an ordinary saved
+report. The batch key includes canonical content identities, tops, scopes and all
+options, so a changed basis starts new preparation rather than inheriting stale
+incidence. This tests whether deterministic hierarchy scans can pay immutable
+preparation once without weakening the local proof contract; representative
+workplace performance remains an evidence question.

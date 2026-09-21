@@ -62,6 +62,36 @@ def bounded_compare(a, b, *, top_a, top_b, options, scope_a, scope_b,
                     'scope_a': scope_a, 'scope_b': scope_b, 'same_full_netlist': same_full_netlist}, options)
 
 
+def compare_batch(a, b, *, top_a, top_b, windows, options=None,
+                  scope_a=None, scope_b=None, same_full_netlist=False):
+    """Compare an ordered set of supplied windows with explicit batch-local reuse.
+
+    ``windows`` is a sequence of mappings containing only ``paths_a`` and
+    ``paths_b``.  The inputs, tops, scopes and options are fixed for the whole
+    batch; callers start another batch when any of them changes.  Each returned
+    report retains an independently encoded graph and proof.
+    """
+    options = options or Options(matching_mode='operator_scoped')
+    scope_a, scope_b = scope_a or InputScope(), scope_b or InputScope()
+    if options.matching_mode != 'operator_scoped':
+        raise ValueError('operator batch requires matching_mode operator_scoped')
+    normalized=[]
+    if not isinstance(windows, (tuple, list)) or not windows:
+        raise ValueError('operator batch windows must be a nonempty tuple/list')
+    for window in windows:
+        if not isinstance(window, dict) or set(window) - {'paths_a','paths_b'}:
+            raise ValueError('each operator batch window contains only paths_a and paths_b')
+        paths_a,paths_b=window.get('paths_a',()),window.get('paths_b',())
+        for paths in (paths_a,paths_b):
+            if not isinstance(paths,(tuple,list)) or any(not isinstance(p,str) or not p for p in paths):
+                raise ValueError('batch paths must be nonempty strings in a tuple/list')
+        normalized.append({'paths_a':tuple(paths_a),'paths_b':tuple(paths_b)})
+    from .scoped_runtime import bounded_batch
+    return bounded_batch({'a':a,'b':b,'top_a':top_a,'top_b':top_b,
+                          'scope_a':scope_a,'scope_b':scope_b,'options':options,
+                          'same_full_netlist':same_full_netlist,'windows':normalized}, options)
+
+
 def compare_files(args, options, scope):
     """CLI parsing and normalization run inside the same killable worker."""
     from .scoped_runtime import bounded
@@ -241,6 +271,40 @@ def _exterior(data,top,view,roots,selections,scope,options):
             'witness_paths':sorted(witnesses),'meaning':'Physical crossing nets reconstructed from represented full-top incidence; caller aliases are exterior context.'}
 
 
+def _exterior_index(data, top, scope, options):
+    full=expand(data,top,scope,options)
+    paths={n:tuple(sorted({full.leaves[i].path for i,r in endpoints})) for n,endpoints in full.nets.items()}
+    return {'paths_by_physical_net':paths,
+            'complete':not full.budget_exhausted and not any(l.opaque for l in full.leaves)}
+
+
+def _indexed_exterior(index,view,selections):
+    selected={l.path for l in view.leaves};physical={}
+    for selection in selections:physical.update(selection['physical_net_map'])
+    touched={physical.get(n,n) for leaf in view.leaves for n in leaf.nets.values()}
+    crossing=[];witnesses=set()
+    for n in sorted(touched):
+        outside=[p for p in index['paths_by_physical_net'].get(n,()) if p not in selected]
+        if outside:crossing.append({'physical_net':n,'outside_paths':outside});witnesses.add(outside[0])
+    return {'complete':index['complete'],'crossing_nets':crossing,'count':len(crossing),
+            'witness_paths':sorted(witnesses),'meaning':'Physical crossing nets reconstructed from represented full-top incidence; caller aliases are exterior context.'}
+
+
+def _prepare_batch(request):
+    start=time.monotonic();a,b=request['a'],request['b'];options=request['options']
+    identities={'a':identity(a),'b':identity(b)};identity_done=time.monotonic()
+    exterior={s:_exterior_index(data,request['top_'+s],request['scope_'+s],options)
+              for s,data in (('a',a),('b',b))}
+    prepared={'identities':identities,'exterior':exterior}
+    key={'input_identity':identities,'top_a':request['top_a'],'top_b':request['top_b'],
+         'scope_a':asdict(request['scope_a']),'scope_b':asdict(request['scope_b']),
+         'options':asdict(options)}
+    prepared['key_sha256']=digest(key)
+    prepared['phase_seconds']={'input_identity':identity_done-start,
+                               'full_top_exterior_index':time.monotonic()-identity_done}
+    return prepared
+
+
 def _terminal_evidence(window):
     proof=window['hypotheses'];graph=window['anonymous_input']
     if proof.get('certified') and proof['K']:
@@ -284,7 +348,7 @@ def _present(window, parameters_enabled, limits=None):
     else:window['omitted'].append({'lane':'environment','reason':'incomplete_full_top_exterior_incidence'})
 
 
-def _execute(request):
+def _execute(request, prepared=None):
     start=time.monotonic();options=request['options'];deadline=start+options.operator_time_limit
     phases={};phase_start=start;limits=limits_for(options)
     def phase(name):
@@ -312,7 +376,8 @@ def _execute(request):
     phase('selection_and_interfaces')
     graph,addresses,net_addresses=encode(views)
     charge={s:sorted(set(addresses[s])|set(roots[s])) for s in ('a','b')};cost=sum(map(len,charge.values()))
-    result=incomplete_report(request,'pending');result['input_identity']={'kind':'retained_canonical_data_sha256','a':identity(a),'b':identity(b)}
+    result=incomplete_report(request,'pending');identities=prepared['identities'] if prepared else {'a':identity(a),'b':identity(b)}
+    result['input_identity']={'kind':'retained_canonical_data_sha256',**identities}
     result['scope'].update(a=asdict(request['scope_a']),b=asdict(request['scope_b']),global_net_declarations_complete=request['scope_a'].globals_complete and request['scope_b'].globals_complete)
     for s,view in views.items():
         side=catalog(view);side.update(classes=[],coverage={'unresolved':sum(not l.opaque for l in view.leaves),'opaque':sum(bool(l.opaque) for l in view.leaves)},
@@ -322,7 +387,8 @@ def _execute(request):
     phase('encoding_and_catalogs')
     ext={};unknown=[]
     for s,data in (('a',a),('b',b)):
-        ext[s]=_exterior(data,request['top_'+s],views[s],roots[s],selections[s],request['scope_'+s],options)
+        ext[s]=(_indexed_exterior(prepared['exterior'][s],views[s],selections[s]) if prepared else
+                _exterior(data,request['top_'+s],views[s],roots[s],selections[s],request['scope_'+s],options))
     validate_exterior(ext)
     phase('exterior_incidence')
     window={'id':'local0','supplied_scopes':roots,'scope_correspondence':'operator input; not discovered','members':addresses,'net_addresses':net_addresses,
@@ -349,7 +415,8 @@ def _execute(request):
     used={s:sorted({p for c in window['cards'] for p in c['charged_paths'][s]}) for s in ('a','b')}
     extension=result['operator_scoped'];extension.update(status=status,certified_internal=status=='certified',windows=[window],cards=window['cards'],charged_paths=used,charged_count=sum(map(len,used.values())))
     extension['parameter_detail_enabled']=options.operator_parameters
-    extension['resources'].update(core_seconds=time.monotonic()-start,phase_seconds=phases,query_seconds=options.operator_query_seconds,solver='scipy.optimize.milp/HiGHS; mathematical attaining-bound certificates first',cold_start=True,worker_count=1)
+    extension['resources'].update(core_seconds=time.monotonic()-start,phase_seconds=phases,query_seconds=options.operator_query_seconds,solver='scipy.optimize.milp/HiGHS; mathematical attaining-bound certificates first',cold_start=prepared is None,worker_count=1,
+                                  batch_reuse_key_sha256=prepared['key_sha256'] if prepared else None)
     result['metrics']['seconds']['operator_scoped']=time.monotonic()-start
     if views['a'].selection and views['b'].selection:
         from .boundary import boundary_report
@@ -358,6 +425,22 @@ def _execute(request):
         if not request.get('same_full_netlist'):
             result['boundary']['outer_net_relation']='Side-local context only; net spelling in different inputs is not identity.'
     return result
+
+
+def _execute_batch(request):
+    start=time.monotonic();prepared=_prepare_batch(request);results=[]
+    for number,window in enumerate(request['windows']):
+        item={**request,**window}
+        item.pop('windows',None)
+        result=_execute(item,prepared)
+        result['operator_scoped']['resources']['batch_window_index']=number
+        results.append(result)
+    return {'schema_version':1,'kind':'operator_scoped_batch_v1','results':results,
+            'reuse':{'scope':'this_batch_only','key_sha256':prepared['key_sha256'],
+                     'input_identity':prepared['identities'],'window_count':len(results),
+                     'meaning':'Only immutable input identity and full-top exterior incidence are reused; every window has its own selection, anonymous graph and proof.'},
+            'resources':{'preparation_phase_seconds':prepared['phase_seconds'],
+                         'core_seconds':time.monotonic()-start,'worker_count':1}}
 
 
 def validate_saved_extension(extension):

@@ -754,6 +754,19 @@ views retain the full source window as context. Parameter-name filtering belongs
 to legacy raw-pair views; local parameter evidence is a class multiset, not a
 claimed per-leaf identity. Use `--omit-parameters` to hide that lane.
 
+For a deterministic ordered scan, `compare_operator_scoped_batch(...)` accepts
+a nonempty sequence of `{"paths_a": (...), "paths_b": (...)}` mappings. One
+batch fixes its canonical inputs, tops, `InputScope` values and `Options`; it
+reuses only content identities and full-top exterior incidence within its
+isolated sequential worker. Returned reports remain ordinary independently
+validated operator-scoped reports, in request order. Selection, anonymous
+encoding, admission, literal facts, solver state and proof certificates are
+per-window. A new call prepares a new batch, so changed inputs, scope or options
+cannot reuse stale state. There is no hidden process-global cache, and the
+single-window API/CLI behavior is unchanged. Worker transfer reports its actual
+serialized size and is bounded by both 32 MiB per requested window and a 512 MiB
+aggregate ceiling.
+
 ### Representation and objectives
 
 The matcher receives only anonymous integer leaf/net indices, case-folded literal

@@ -420,3 +420,40 @@ def test_scaling_cli_help_and_json(tmp_path,capsys):
     assert result['operator_scoped']['limits']['nets_per_side']==96
     assert result['operator_scoped']['certified_internal'] and not result['operator_scoped']['cards']
     validate_saved_extension(result['operator_scoped'])
+
+
+def test_explicit_batch_reuses_only_immutable_preparation_and_matches_cold_reports():
+    from netlist_comparison import compare_operator_scoped_batch
+    data=from_text('.subckt B a b\nR1 a m 1k\nC1 m b 1p\n.ends\n'
+                   'Xone a b B\nXtwo c d B\nRoutside a e 2k\n')
+    options=Options(matching_mode='operator_scoped')
+    windows=[{'paths_a':('TOP/Xone',),'paths_b':('TOP/Xtwo',)},
+             {'paths_a':('TOP/Xtwo',),'paths_b':('TOP/Xone',)}]
+    batch=compare_operator_scoped_batch(data,data,top_a='TOP',top_b='TOP',windows=windows,
+                                        options=options)
+    assert batch['kind']=='operator_scoped_batch_v1' and not batch['resources']['incomplete']
+    assert batch['reuse']['scope']=='this_batch_only' and batch['reuse']['window_count']==2
+    assert 0<batch['resources']['serialized_result_bytes']<=batch['resources']['serialized_result_limit_bytes']
+    for index,(window,actual) in enumerate(zip(windows,batch['results'])):
+        cold=compare(data,data,top_a='TOP',top_b='TOP',options=options,**window)
+        for report in (cold,actual):
+            report['metrics']['seconds']={}
+            report['operator_scoped']['resources']={}
+        assert actual==cold
+        validate_saved_extension(batch['results'][index]['operator_scoped'])
+
+
+def test_batch_reuse_key_invalidates_with_input_scope_and_options():
+    from netlist_comparison import compare_operator_scoped_batch
+    from netlist_comparison.model import InputScope
+    base=from_text('R1 a b 1k\n');changed=from_text('R1 a b 2k\n')
+    windows=[{'paths_a':(),'paths_b':()}]
+    def key(a=base,b=base,scope=InputScope(),options=Options(matching_mode='operator_scoped')):
+        return compare_operator_scoped_batch(a,b,top_a='TOP',top_b='TOP',windows=windows,
+                                             options=options,scope_a=scope,scope_b=scope)['reuse']['key_sha256']
+    original=key()
+    assert key(b=changed)!=original
+    assert key(scope=InputScope(global_nets=('a',)))!=original
+    assert key(options=Options(matching_mode='operator_scoped',operator_max_nets=65))!=original
+    with pytest.raises(ValueError,match='contains only'):
+        compare_operator_scoped_batch(base,base,top_a='TOP',top_b='TOP',windows=[{'paths_a':(),'label':'x'}])

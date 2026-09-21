@@ -455,6 +455,29 @@ coverage `K` and `K-1` results. Literal inventory facts may still be available
 when correspondence cannot be certified. Local hypotheses stay in
 `operator_scoped.windows`; global `representative_pair_ids` remain empty.
 
+Deterministic scans over many windows can keep preparation local and explicit:
+
+```python
+from netlist_comparison import compare_operator_scoped_batch, Options
+
+batch = compare_operator_scoped_batch(
+    before, after, top_a="TOP", top_b="TOP",
+    windows=[
+        {"paths_a": ("TOP/X1",), "paths_b": ("TOP/X1",)},
+        {"paths_a": ("TOP/X2",), "paths_b": ("TOP/X2",)},
+    ],
+    options=Options(matching_mode="operator_scoped"),
+)
+```
+
+Inputs, tops, scopes and options are fixed for one batch. It reuses their
+content identities and the complete full-top exterior-incidence index inside
+one bounded worker. Every window still receives a new selection, anonymous
+graph, proof and saved report. Start another batch when any fixed input changes;
+there is no process-global cache. Batch transfer retains the ordinary 32 MiB
+per-window serialization allowance with a 512 MiB aggregate ceiling and reports
+the actual byte count. The single-window API and CLI are unchanged.
+
 Execution currently requires Linux/POSIX fork and `/proc`. The configurable
 worker deadline defaults to 60 seconds, RSS watchdog to 3072 MiB, and individual
 solver attempts to at most 10 seconds. The parent samples worker RSS every
