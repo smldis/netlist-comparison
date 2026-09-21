@@ -24,6 +24,7 @@ EXAMPLES = """Start here (inputs are SPICE files, or spice-canonical tables with
   netlist-compare before.sp after.sp --top-a AMP --top-b AMP --output result.json
       Compare named blocks and save the complete result.
   netlist-compare full.sp --top TOP --path-a TOP/X1 --path-b TOP/X2
+  netlist-compare full.canonical --format canonical --top TOP --path-a TOP/XOLD --path-b TOP/XNEW --black-box-missing --matching-mode operator_scoped --text
       Compare two actual block calls, including their pins, in one file.
   netlist-compare before.sp after.sp --matching-mode regional --output result.json
       Try experimental hierarchy/regrouping matching; fixed remains the default.
@@ -49,10 +50,27 @@ Exit status: 0 = completed (possibly partial/ambiguous), 2 = input/usage/I/O err
 
 GUIDE = """Operator mini-guide
 
+Experimental supplied windows
+  --matching-mode operator_scoped compares only the region correspondence you
+  supply: one full canonical file with --top and both --path-a/--path-b, or two
+  canonical files with --top-a/--top-b and optional per-side paths. Repeat paths
+  only in this mode for unions. It makes no automatic global discovery or
+  identity claim. --black-box-missing retains literal named/positional boundaries.
+  At most 64 leaves/64 nets per side, 16 counterparts, 12 cards/100 full A+B paths.
+  --operator-seconds 60 and --operator-memory-mib 3072 are configurable worker defaults, including CLI input loading and worker
+  result encoding; final stdout/disk serialization is outside the deadline.
+  POSIX /proc is required. Timeout, opaque or
+  oversized scope is abstention, not certified quiet. --omit-parameters selects
+  architecture/environment cards; literal parameter facts remain in full JSON.
+  All weighted and K/K-1 proofs are required for terminal evidence. Equal
+  boundary counts do not establish unchanged environment; alternatives remain
+  unresolved. `view RESULT --category local --text` retains complete support.
+
 Choose an input shape
   A B compares two revisions.  A --inspect only discovers circuits, paths and
   extraction problems.  A --path-a PATH --path-b PATH compares two actual calls
-  in one revision; it is not a shorthand for two revisions.  Use --top-a/--top-b
+  in one revision by default; it is not a shorthand for two revisions.
+  operator_scoped additionally accepts per-side paths with two inputs. Use --top-a/--top-b
   with two files, and --top with inspect or two calls.  Inspect first when a file
   has several definitions or when a path needs percent-escaped segments.
 
@@ -164,8 +182,8 @@ def build_parser():
     select.add_argument('--top-a', metavar='CIRCUIT', help='Circuit in A; default: populated file-level TOP, or sole definition')
     select.add_argument('--top-b', metavar='CIRCUIT', help='Circuit in B; same automatic rule as A')
     select.add_argument('--top', metavar='CIRCUIT', help='Root for --inspect or --path-a/--path-b; same automatic rule')
-    select.add_argument('--path-a', metavar='PATH', help='First actual block call, e.g. TOP/X1; discover with --inspect')
-    select.add_argument('--path-b', metavar='PATH', help='Second actual block call, e.g. TOP/X2; both paths required')
+    select.add_argument('--path-a', action='append', metavar='PATH', help='Actual A block call, e.g. TOP/X1; operator_scoped permits repetition for a scope union, including two-file inputs')
+    select.add_argument('--path-b', action='append', metavar='PATH', help='Actual B block call; both required with one file; repeatable only in operator_scoped')
     select.add_argument('--format', choices=('eldo', 'ngspice', 'canonical'), default='eldo', help='Input syntax for both files (default: eldo); canonical loads spice-canonical tables without re-extraction')
     select.add_argument('--global-net', action='append', default=[], metavar='NET', help='Extra global net on both sides, e.g. VDD; repeatable; ground 0 is included')
     select.add_argument('--globals-complete', action='store_true', help='Assert these globals plus 0 are complete; otherwise completeness is unknown')
@@ -177,11 +195,14 @@ def build_parser():
     display.add_argument('--json', action='store_true', help='Full JSON stdout, or silent stdout with --output (comparison only)')
     output.add_argument('--limit', type=integer(1), default=10, metavar='N', help='Maximum rows per text/inspection section (default: 10); does not limit matching')
     search = parser.add_argument_group('Matching and compute (optional)')
-    search.add_argument('--matching-mode', choices=('fixed', 'anchor_growth', 'partial_qap', 'regional'), default='fixed',
-                        help='fixed: local feature retrieval/optional assignment (default); regional: hierarchy alternatives; anchor_growth: tentative-anchor propagation; partial_qap: dense structural reference')
+    search.add_argument('--matching-mode', choices=('fixed', 'anchor_growth', 'partial_qap', 'regional', 'operator_scoped'), default='fixed',
+                        help='fixed: local feature retrieval/optional assignment (default); regional: hierarchy alternatives; anchor_growth: tentative-anchor propagation; partial_qap: dense structural reference; operator_scoped: opt-in exact conditional evidence inside supplied windows (no global discovery)')
     search.add_argument('--context-mode', choices=('none', 'frozen_neighbors'), default='none', help='Optional fixed-mode neighbour context (default: none); incompatible with other modes')
     search.add_argument('--component-presentation', choices=('existing', 'minimum_raw'), default='existing',
                         help='Regional only: minimum_raw reduces changed leaf rows within certified whole-component permutations; preserves structural ambiguity (default: existing)')
+    search.add_argument('--operator-seconds', type=float, default=60.0, help='operator_scoped only: worker computation deadline including canonical loading (default:60 seconds); expiry is incomplete, never quiet; final stdout/disk serialization is outside this deadline')
+    search.add_argument('--operator-memory-mib', type=integer(64), default=3072, help='operator_scoped only: worker RSS watchdog budget (default:3072 MiB; POSIX /proc required)')
+    output.add_argument('--omit-parameters', action='store_true', help='operator_scoped only: architecture/environment cards without parameter-detail cards; full local parameter facts remain in JSON')
     defaults = Options()
     for name, help_text in BUDGET_HELP.items():
         search.add_argument('--' + name.replace('_', '-'), type=integer(0 if name in ('max_alternative_checks', 'omission_work_limit', 'swap_work_limit') else 1),
@@ -218,8 +239,8 @@ def view_parser():
     parser.add_argument('result', type=Path, help='Saved full result.json (or result.json.gz)')
     parser.add_argument('--under-a', action='append', default=[], metavar='PATH', help='Focus an A subtree; repeatable, case-insensitive, percent-escaped segments; retains its paired B context')
     parser.add_argument('--under-b', action='append', default=[], metavar='PATH', help='Focus a B subtree; repeatable; either side may select a pair and retain the opposite context')
-    parser.add_argument('--category', choices=('raw', 'wiring', 'unpaired'), action='append', metavar='CATEGORY',
-                        help='Repeat raw|wiring|unpaired; default all. raw=leaf fields, wiring=represented partition rows, unpaired=dispositions/population evidence')
+    parser.add_argument('--category', choices=('raw', 'wiring', 'unpaired', 'local'), action='append', metavar='CATEGORY',
+                        help='Repeat raw|wiring|unpaired|local; default all. local=indivisible operator-scoped cards with full charged context. raw=leaf fields, wiring=represented partition rows, unpaired=dispositions/population evidence')
     details = parser.add_mutually_exclusive_group()
     details.add_argument('--parameter', metavar='NAME', help='Raw leaf parameter override name, e.g. W; requires raw category')
     details.add_argument('--omit-parameters', action='store_true',
@@ -234,6 +255,10 @@ def view_parser():
 
 
 def view_summary(view, limit, output=None):
+    if 'operator_scoped' in view.get('context', {}):
+        from .terminal import operator_summary
+        extension = {**view['context']['operator_scoped'], 'cards':view['findings'].get('local_cards', [])}
+        return 'Derived saved-result view; complete retained cards keep original charges.\n' + operator_summary(extension, limit, output)
     counts = view['counts']['by_category']
     lines = ['Derived saved-result view; the full comparison remains the authority.',
              'Source: ' + str(view['source']['path']),
@@ -327,7 +352,7 @@ def view_main(argv):
         report = json.loads(decoded)
         view = project_saved_report(report, source_path=args.result, source_sha256=artifact_sha256(data),
                                     under_a=args.under_a, under_b=args.under_b,
-                                    categories=args.category or ('raw', 'wiring', 'unpaired'),
+                                    categories=args.category or ('raw', 'wiring', 'unpaired', 'local'),
                                     parameter=args.parameter, group_depth=args.group_depth,
                                     omit_parameters=args.omit_parameters)
         encoded = json.dumps(view, indent=2, allow_nan=False) + '\n'
@@ -363,7 +388,12 @@ def main(argv=None):
     if args.inspect:
         if args.b or instance_mode or args.top_a or args.top_b or args.output or args.json:
             parser.error('--inspect takes one file and optional --top CIRCUIT; omit comparison/output options.')
+    elif instance_mode and args.matching_mode == 'operator_scoped':
+        if (not args.b and (not args.path_a or not args.path_b or args.top_a or args.top_b)) or (args.b and args.top):
+            parser.error('operator_scoped: one file needs both paths and --top; two files use --top-a/--top-b with optional per-side paths.')
     elif instance_mode:
+        if len(args.path_a or ()) > 1 or len(args.path_b or ()) > 1:
+            parser.error('repeated paths require --matching-mode operator_scoped')
         if not args.path_a or not args.path_b or args.b or args.top_a or args.top_b:
             parser.error('Use one file and both --path-a and --path-b. Example: netlist-compare full.sp --top TOP --path-a TOP/X1 --path-b TOP/X2')
     elif not args.b or args.top:
@@ -371,7 +401,10 @@ def main(argv=None):
     try:
         if args.context_mode != 'none' and args.matching_mode != 'fixed':
             parser.error('--context-mode frozen_neighbors requires --matching-mode fixed; omit --context-mode for other modes.')
+        if args.matching_mode != 'operator_scoped' and (args.omit_parameters or args.operator_seconds != 60.0 or args.operator_memory_mib != 3072):
+            parser.error('--operator-seconds/--operator-memory-mib/--omit-parameters require --matching-mode operator_scoped')
         options = Options(matching_mode=args.matching_mode, context_mode=args.context_mode,
+                          operator_time_limit=args.operator_seconds, operator_memory_mib=args.operator_memory_mib, operator_parameters=not args.omit_parameters,
                           component_presentation=args.component_presentation,
                           black_box_missing=args.black_box_missing,
                           **{name: getattr(args, name) for name in BUDGET_HELP})
@@ -381,7 +414,11 @@ def main(argv=None):
                 parser.error(f'Cannot read netlist file: {path}. Check the path; quote paths containing spaces.')
             if args.output and args.output.resolve() == path.resolve():
                 parser.error('--output must be different from the input files.')
-        a = load_netlist(args.a, args.format)
+        if args.matching_mode == 'operator_scoped' and not args.inspect:
+            from .operator_scoped import compare_files
+            result = compare_files(args, options, scope)
+        else:
+            a = load_netlist(args.a, args.format)
         if args.inspect:
             top = args.top
             if top is None and (a.top.devices or len(a.subcircuits) <= 1):
@@ -389,9 +426,11 @@ def main(argv=None):
             view = expand(a, choose_top(a, top, '--top'), scope, options) if top else None
             sys.stdout.write(inspection(a, view, args.a, args.limit))
             return 0
-        if instance_mode:
+        if args.matching_mode == 'operator_scoped':
+            pass  # Complete input parsing/comparison already ran in the bounded worker.
+        elif instance_mode:
             top = choose_top(a, args.top, '--top')
-            result = compare_instances(a, top=top, path_a=args.path_a, path_b=args.path_b, options=options, scope=scope)
+            result = compare_instances(a, top=top, path_a=args.path_a[0], path_b=args.path_b[0], options=options, scope=scope)
         else:
             b = load_netlist(args.b, args.format)
             result = compare(a, b, top_a=choose_top(a, args.top_a, '--top-a'),

@@ -107,6 +107,8 @@ def swap_summary(search, limit):
 
 
 def summary(report, limit, output=None):
+    if 'operator_scoped' in report:
+        return operator_summary(report['operator_scoped'], limit, output)
     scope = report['scope']
     lines = [f'Comparison: {scope["top_a"]} -> {scope["top_b"]}',
              f'Matching: {report["options"]["matching_mode"]}; all counterparts are tentative.']
@@ -181,3 +183,44 @@ def summary(report, limit, output=None):
     else:
         lines.append('Save the complete evidence and alternatives with --output result.json; use --json for JSON stdout.')
     return '\n'.join(lines) + '\n'
+
+
+def operator_summary(extension, limit=10, output=None):
+    cards = extension['cards']
+    used = {s:{p for c in cards for p in c['charged_paths'][s]} for s in ('a','b')}
+    lines = ['Experimental operator-scoped inspection; supplied regions, no global identity/discovery.',
+             f"Status: {extension['status']}; internal proof certified: {extension['certified_internal']}",
+             f"Conditional cards: {len(cards)}; full charged A+B paths: {sum(map(len,used.values()))}/100 (maximum 12 cards)."]
+    for window in extension.get('windows',[]):
+        for side in ('a','b'):
+            roots=window['supplied_scopes'][side]
+            lines.append(f"{side.upper()} supplied scopes: " + ', '.join(roots[:limit]) + (f"; {len(roots)-limit} more in JSON" if len(roots)>limit else ''))
+        lines.append(f"Full member/scope charge before exterior support: {window['full_member_scope_charge']}/100.")
+        proof=window.get('hypotheses',{})
+        if proof:
+            lines.append(f"K={proof['K']}; weighted={proof['weighted']['status']}; K proof={proof['maximum_coverage']['status']}; K-1={proof['one_pair_less']['status'] if proof['one_pair_less'] else 'not applicable'}.")
+        frontier=window.get('coverage_sensitivity')
+        if frontier:lines.append(f"Terminal mismatch at K/K-1: {frontier['error_at_K']}/{frontier['error_at_K_minus_1']}; loss-of-coverage sensitive={frontier['loss_of_one_pair_removes_residual']}.")
+        for omitted in window.get('omitted',[]):lines.append(f"Omitted {omitted['lane']}: {omitted['reason']}.")
+    for card in cards[:limit]:
+        kinds=', '.join(e['kind'] for e in card['evidence'])
+        lines.append(f"{card['lane']}: {kinds}; {card['charged_count']} fully charged paths.")
+        for s in ('a','b'):
+            paths=card['focus_paths'][s];shown=paths[:min(limit,4)]
+            lines.append(f"  {s.upper()} inspect ({len(paths)}): " + ', '.join(shown) + (f"; {len(paths)-len(shown)} more in JSON" if len(paths)>len(shown) else ''))
+        for e in card['evidence'][:min(limit,3)]:
+            if e['kind']=='represented_population_residual':lines.append(f"  B minus A represented population: {e['value']:+d}.")
+            if e['kind']=='literal_inventory_or_interface_residual':
+                for row in e['value'][:min(limit,3)]:lines.append(f"  {str(row['class'])[:180]}: A/B={row['a']}/{row['b']}.")
+            if e['kind']=='represented_physical_boundary_count':lines.append(f"  Physical crossing nets A/B={e['a']}/{e['b']}.")
+        if card['lane']=='parameter_detail':
+            for e in card['evidence'][:min(limit,3)]:
+                lines.append('  Literal parameter populations: '+str(e['a'])[:180]+' -> '+str(e['b'])[:180])
+    if not cards:
+        lines.append('No selected cards. Consult retained evidence and lane/filter settings; proof certification is not an unchanged or electrical verdict.')
+    lines.append('Alternatives remain unresolved; inventory may be relabeling. Positional @N roles are positions, not named semantic pins.')
+    lines.append('Full paid context and local proof witnesses remain in JSON; no local pairs are global representatives.')
+    resources=extension.get('resources',{})
+    lines.append(f"Resources: {resources.get('elapsed_seconds',0):.3f}s; peak worker RSS {resources.get('observed_peak_rss_kib',0)}KiB; stop={resources.get('stop_reason') or 'completed'}.")
+    if output:lines.append('Complete JSON saved to: '+str(output))
+    return '\n'.join(lines)+'\n'

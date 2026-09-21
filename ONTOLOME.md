@@ -425,3 +425,44 @@ that storage while preserving ordering, without imposing a new hard admission
 limit. Score budgets still do not bound total runtime or memory. Prototype maturity
 is unchanged. A next possibility is a small coupled structural proposal that can
 cross the remaining basin more effectively than leaf transpositions alone.
+
+## Supplied-region experimental contract
+
+An opt-in `operator_scoped` mode now separates the operator's knowledge of a
+region relationship from the comparator's evidence inside it. This revises the
+assumption that useful local inspection must wait for automatic global discovery.
+Supplied paths/top selections and unions are input knowledge, never recovered
+correspondence. Existing modes remain unchanged.
+
+The primary local model cannot see occurrence names, hierarchy paths or net
+spellings. It uses explicit whitelisted literal cell/interface semantics and
+original incidence, with case-consistent roles and collision rejection. A bounded
+exact binary leaf/net model, attaining-bound certificates and a cold anonymous
+ordering portfolio require weighted and K/K-1 optimality before necessary
+terminal evidence. SciPy/HiGHS carries the same objective with existing package
+dependencies; its target performance remains unmeasured. Alternative explanations
+remain unresolved. Local witnesses never become global representative pairs.
+
+Complete selected-member/scope/support charges bound conditional architecture,
+parameter and separate exterior cards. Sampled Linux worker time/RSS watchdogs
+make exhaustion observable; absence of cards is not a proof of unchanged design.
+The current exterior scalar only detects crossing-net count changes. Unknown
+label semantics, hidden internals, ambiguous exact explanations, budget overflow,
+final output I/O and fork-based embedding limits remain explicit. Source catalogs
+and saved views retain the paid context.
+
+Observed package controls exercise exact/quiet/changed cases, alternative optima,
+normalization, anonymous order fallback, corrupted evidence, exterior witnesses,
+composed scopes and CLI/view behavior. This supports a runnable experimental
+vertical slice, not private accuracy or maturity advancement. The next
+architectural question is whether a knowledgeable operator can choose affordable
+real canonical regions and receive useful conditional evidence with these limits.
+
+Review exposed four boundaries that are now explicit in this local contract:
+canonical root identity governs union deduplication; unequal represented
+interfaces supply inventory residuals without suppressing unrelated content;
+structural metadata filtering never drops explicit black-box instance overrides;
+and saved cards are reconstructed from incidence/proofs rather than trusted as
+independent assertions. Certification, lanes, focus, meaning and full charges
+must agree with that reconstruction. These are consistency guarantees, not
+authentication of an arbitrarily rewritten source report.

@@ -20,6 +20,9 @@ class Options:
     """Experimental budgets and costs, not calibrated confidence settings."""
 
     matching_mode: str = "fixed"
+    operator_time_limit: float = 60.0
+    operator_memory_mib: int = 3072
+    operator_parameters: bool = True
     regional_work_limit: int = 50_000  # new incidence states/component certificates only
     omission_work_limit: int = 0  # opt-in full-map exchange scores; 0 disables
     swap_work_limit: int = 0  # opt-in full-map paired-swap scores; 0 disables
@@ -41,6 +44,12 @@ class Options:
     component_presentation: str = "existing"
 
     def __post_init__(self):
+        if not isinstance(self.operator_time_limit, (int, float)) or not math.isfinite(self.operator_time_limit) or self.operator_time_limit <= 0:
+            raise ValueError('operator_time_limit must be finite and positive')
+        if type(self.operator_memory_mib) is not int or self.operator_memory_mib < 64:
+            raise ValueError('operator_memory_mib must be an integer at least 64')
+        if type(self.operator_parameters) is not bool:
+            raise ValueError('operator_parameters must be boolean')
         if type(self.omission_work_limit) is not int or self.omission_work_limit < 0:
             raise ValueError("omission_work_limit must be a nonnegative integer")
         if self.omission_work_limit and self.matching_mode != "regional":
@@ -55,8 +64,8 @@ class Options:
             raise ValueError("component_presentation minimum_raw requires matching_mode regional")
         if type(self.black_box_missing) is not bool:
             raise ValueError("black_box_missing must be a boolean")
-        if self.matching_mode not in ("fixed", "anchor_growth", "partial_qap", "regional"):
-            raise ValueError("matching_mode must be fixed, anchor_growth, partial_qap or regional")
+        if self.matching_mode not in ("fixed", "anchor_growth", "partial_qap", "regional", "operator_scoped"):
+            raise ValueError("matching_mode must be fixed, anchor_growth, partial_qap, regional or operator_scoped")
         if self.matching_mode != "fixed" and self.context_mode != "none":
             raise ValueError("experimental matching uses its own context; leave context_mode=none")
         if self.context_mode not in ("none", "frozen_neighbors"):

@@ -410,3 +410,61 @@ JSON retains `partial_alignment.swap_search` and reconstructible witnesses.
 even with subtree filters; leaf/wiring selections remain separately scoped.
 Names and raw values do not rank swap search; existing certified presentation
 may subsequently choose an incidence-preserving representative.
+
+## Experimental operator-supplied comparison windows
+
+When you already know which blocks correspond, opt into `operator_scoped` to
+inspect their represented content and connectivity. This is a local inspection
+contract: your paths supply the correspondence, and never count as discovered
+identity. Existing matching defaults are unchanged.
+
+```sh
+netlist-compare full.canonical --format canonical --top TOP \
+  --path-a TOP/XOLD --path-b TOP/XNEW \
+  --black-box-missing --matching-mode operator_scoped \
+  --operator-seconds 180 --operator-memory-mib 3072 --output local.json --text
+
+netlist-compare before.canonical after.canonical --format canonical \
+  --top-a TOP --top-b TOP --path-a TOP/XOLD --path-b TOP/XNEW \
+  --black-box-missing --matching-mode operator_scoped --output local.json --text
+
+netlist-compare view local.json --category local --omit-parameters --text
+```
+
+For two files, omit paths to compare their entire selected tops. Repeat per-side
+`--path-a`/`--path-b` flags to explicitly compose split/merged regions. All
+selected leaves and scope addresses count against the budget; filtering a saved
+card does not discard its opposite-side context or support charges.
+
+Cards show conditional architecture, literal parameter populations and separate
+exterior context. They do not claim unique identity, recovered edits, unchanged
+circuit behavior or electrical equivalence. The primary matcher cannot see leaf
+names, hierarchy paths or net spellings. Cell labels, named terminal roles and
+positional `@N` roles retain their different literal meanings. Unknown cell-label
+semantics cannot distinguish replacement from relabeling. Unequal black-box
+interface widths remain literal inventory evidence with no cross-width pairing;
+unrelated supported content can still be analyzed. Case-folding terminal-role collisions are rejected. Explicit black-box instance
+overrides are retained, including names such as `model`, `source_type` and `raw`.
+`--omit-parameters` hides the parameter-detail lane, retaining its facts in JSON.
+
+The admitted region has at most 64 leaves and 64 nets per side, 16 compatible
+counterparts per endpoint, 12 cards and 100 distinct side-qualified member,
+scope and support paths. Oversized/opaque/incomplete regions are visibly
+uncertified. Local terminal evidence requires certified weighted, maximum-
+coverage `K` and `K-1` results. Literal inventory facts may still be available
+when correspondence cannot be certified. Local hypotheses stay in
+`operator_scoped.windows`; global `representative_pair_ids` remain empty.
+
+Execution currently requires Linux/POSIX fork and `/proc`. The configurable
+worker deadline defaults to 60 seconds, RSS watchdog to 3072 MiB, and individual
+solver attempts to at most 10 seconds. The parent samples worker RSS every
+20 ms and kills an over-budget worker: this is a sampled watchdog, not an
+allocation-time memory ceiling. CLI input loading and worker result encoding
+are inside the deadline; final stdout/disk serialization and writes are outside.
+For the Python API, caller-side canonical parsing is also outside the deadline.
+Timeout yields an incomplete report, never certified quiet. The worker uses one
+CPU; the solver receives one thread. Multithreaded embedding of the fork-based
+API has not been validated.
+
+See [the detailed local contract](docs/index.md#operator-supplied-local-windows)
+for the objective, certificates, API, output limits and remaining gaps.

@@ -13,16 +13,27 @@ from .report import catalog, connectivity, hierarchy, identity, pair_record
 
 def compare(a: CanonicalNetlist, b: CanonicalNetlist, *, top_a: str, top_b: str,
             options: Options | None = None, scope_a: InputScope | None = None,
-            scope_b: InputScope | None = None) -> dict:
+            scope_b: InputScope | None = None, paths_a: tuple[str, ...] = (),
+            paths_b: tuple[str, ...] = ()) -> dict:
     """Return JSON-compatible tentative correspondence and conditional facts.
 
     Explicit tops name either the canonical root or a subcircuit definition.
     Inputs are not modified. Costs, classes and representative solutions are not
-    probabilities or verified identities. Native solver calls have no deadline;
-    size admission limits are enforced, not a wall-time guarantee.
+    probabilities or verified identities. Legacy modes enforce size admission,
+    without a native solver deadline. Experimental operator_scoped runs in an
+    isolated POSIX worker with configurable time/RSS watchdogs. Empty paths_a/b
+    select their whole tops; path tuples explicitly compose supplied regions.
+    Caller-side canonical parsing and final stdout/disk serialization are outside
+    the API computation deadline. Local witnesses never become global identity.
     """
     options = options or Options()
     scope_a, scope_b = scope_a or InputScope(), scope_b or InputScope()
+    if options.matching_mode == 'operator_scoped':
+        from .operator_scoped import bounded_compare
+        return bounded_compare(a, b, top_a=top_a, top_b=top_b, paths_a=paths_a, paths_b=paths_b,
+                               options=options, scope_a=scope_a, scope_b=scope_b)
+    if paths_a or paths_b:
+        raise ValueError('per-side path tuples require matching_mode operator_scoped')
     start = perf_counter()
     va, vb = expand(a, top_a, scope_a, options), expand(b, top_b, scope_b, options)
     return _compare_views(a, b, va, vb, options, scope_a, scope_b, start, top_a, top_b)
@@ -249,6 +260,10 @@ def compare_instances(netlist: CanonicalNetlist, *, top: str, path_a: str,
     if not isinstance(path_a, str) or not isinstance(path_b, str):
         raise ValueError("instance paths must be percent-escaped strings")
     options, scope = options or Options(), scope or InputScope()
+    if options.matching_mode == 'operator_scoped':
+        from .operator_scoped import bounded_compare
+        return bounded_compare(netlist, netlist, top_a=top, top_b=top, paths_a=(path_a,), paths_b=(path_b,),
+                               options=options, scope_a=scope, scope_b=scope, same_full_netlist=True)
     start = perf_counter()
     va = expand(netlist, top, scope, options, path=path_a)
     vb = expand(netlist, top, scope, options, path=path_b)

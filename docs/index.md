@@ -722,3 +722,141 @@ In saved views, the wiring category retains this whole-comparison search evidenc
 and displays bounded path witnesses. Subtree filters still select leaf findings;
 search context remains explicitly unfiltered. Run `netlist-compare --guide`,
 `--help`, and `view --help` for current workflows, controls and examples.
+
+## Operator-supplied local windows
+
+`Options(matching_mode="operator_scoped")` opts into local evidence for an
+explicitly supplied region relationship. It does not rank or discover global
+architectural changes. Existing fixed/regional modes and their evidence keep
+their contracts. A region may be one available hierarchy occurrence, a supplied
+union of occurrences, or the selected whole top in each of two canonical inputs.
+
+```python
+from netlist_comparison import Options, compare, compare_instances
+
+options = Options(matching_mode="operator_scoped", black_box_missing=True,
+                  operator_time_limit=180, operator_memory_mib=3072)
+local = compare_instances(netlist, top="TOP", path_a="TOP/XOLD",
+                          path_b="TOP/XNEW", options=options)
+revision = compare(before, after, top_a="TOP", top_b="TOP",
+                   paths_a=("TOP/XOLD",),
+                   paths_b=("TOP/XLEFT", "TOP/XRIGHT"), options=options)
+```
+
+These functions return the existing complete report envelope with an explicit
+`operator_scoped` extension. Global candidate groups and representative pair IDs
+remain empty; local leaf/net maps are conditional hypotheses inside the window.
+Source catalogs, scope provenance, anonymous solver inputs, proof statuses,
+coverage sensitivity and indivisible charges remain available in full JSON.
+`project_saved_report(..., categories=["local"])` and
+`view RESULT --category local --text` select cards without rematching. Saved
+views retain the full source window as context. Parameter-name filtering belongs
+to legacy raw-pair views; local parameter evidence is a class multiset, not a
+claimed per-leaf identity. Use `--omit-parameters` to hide that lane.
+
+### Representation and objectives
+
+The matcher receives only anonymous integer leaf/net indices, case-folded literal
+cell/model classes, the named-versus-positional terminal basis, normalized roles,
+incidence, and literal parameter values. Its structural metadata whitelist is
+explicit: black-box cell and pin basis only. Source path, instance name,
+definition name, other metadata and net spelling are addresses/output only.
+This structural whitelist does not filter explicit canonical black-box instance
+overrides: all of those parameters remain in the parameter-detail lane, including
+names such as `model`, `source_type`, `raw` and `unresolved_nets`.
+Roles normalize consistently throughout candidates, hints, witnesses and scores;
+a normalization collision is an input error. Positional `@1`, `@2`, etc. never
+become inferred semantic pin names. Parameters do not choose correspondence.
+They form a separate equal-class, equal-population multiset comparison; values
+and expressions are not evaluated. Explicit global declarations and ordinary
+high-fanout incidence follow canonical expansion; no additional global net is
+inferred or deleted.
+
+The complete compatible leaf catalogue requires equal literal cell class, pin
+basis and role set. Different represented interface widths remain inventory
+residuals and cannot pair across widths; they do not suppress independent
+supported parameter/connectivity evidence elsewhere in the supplied region. Binary variables select injective compatible leaf pairs and
+an injective net map. Each matched leaf terminal contributes one mismatch when
+its two nets are not paired. The weighted objective is
+`5 * terminal_mismatches + 3 * (unmatched_A + unmatched_B)`. Separate queries
+minimize mismatch at maximum compatible cardinality `K` and at `K-1`; `K=0`
+has an explicit empty-witness certificate. All three results must be optimal
+before a necessary terminal-residual card is emitted. Dropping one leaf pair may
+remove a residual; the report retains that coverage sensitivity.
+
+The implementation preserves this binary objective and acceptance prerequisites
+using existing SciPy/HiGHS MILP. Anonymous topology refinement supplies only
+candidate witnesses. A zero mismatch witness attains the nonnegative lower
+bound. At full two-sided coverage, maximum injective net assignment over relaxed
+class/role endpoint capacities yields a separately reconstructed mismatch lower
+bound; attaining it certifies optimality. A partition into `K`, `K-1` and all
+smaller cardinalities can certify the weighted optimum, otherwise it needs its
+own solve. Solver results require an integer incidence witness, optimal solver
+status and matching dual bound within `1e-6`; this trusts the native optimizer's
+bound, not a formally verified proof trace.
+
+A cold, deterministic anonymous index portfolio uses identity, then seeds 101
+and 202 on incomplete queries. It never chooses by case identity or favorable
+localization. Transfers validate the complete bijection, original incidence,
+compatible catalogue and objective before acceptance. The first certified
+witness is retained. Alternative optima remain explicitly unresolved; one
+optimal witness cannot establish unique leaf, net or historical edit identity.
+A terminal focus includes touched endpoints, partners and their compatible
+classes. Repeated explanations may therefore enlarge the inspection region.
+No results/cache are shared across API calls.
+
+### Cards, scope and resource accounting
+
+Architecture cards combine literal inventory/interface residuals, represented
+population surplus and certified terminal residuals. Unknown label semantics
+cannot distinguish relabeling from replacement. Parameter cards show literal
+class population changes without inventing a per-leaf pairing. Card text gives
+bounded schematic addresses and values; JSON retains the complete context.
+Internal selected-occurrence nets preserve formal boundary separation. Scope spellings that resolve to the same canonical root are deduplicated before
+composition, so case/percent-encoding aliases cannot create connections. Supplied
+unions join physical connections shared by distinct pieces; their scope provenance keeps
+those maps inspectable. Exterior evidence separately reconstructs physical nets
+with outside represented endpoints. Its current scalar is the crossing-net
+count: changed attachment identity at equal counts is **not detected**. Every
+counted crossing net has an actual outside witness path. Full-top incomplete or
+opaque expansion prevents an environment claim. Hidden black-box internals
+remain unavailable, even when their interfaces are represented.
+
+An admitted query has at most 64 leaves and 64 nets per side and at most 16
+compatible counterparts per leaf. Presentation admits at most 12 cards and
+100 distinct A+B paths, charging every selected leaf, every supplied scope
+address, and exterior witnesses when used. Cards are indivisible: saved filters
+retain their full charges. A quiet card list alone is not certification, nor an
+unchanged verdict; inspect status, omitted lanes and retained evidence. Inventory
+or parameter facts may be shown even when a bounded correspondence query cannot
+be certified. No such incomplete query supplies necessary terminal evidence.
+
+The default isolated worker allowance is 60 seconds/3072 MiB with one CPU and
+at most 10 seconds per solve; configure `operator_time_limit` /
+`--operator-seconds` for server-minute trials and `operator_memory_mib` /
+`--operator-memory-mib` for RAM. Linux/POSIX fork and `/proc` are currently
+required. The parent checks time and sampled worker RSS approximately every
+20 ms, kills on exhaustion, and records an incomplete result. RSS sampling can
+overshoot briefly and is not a hard allocation ceiling. Worker output is capped
+at 32 MiB. CLI loading, expansion, matching and worker JSON encoding fall inside
+the computation deadline. Final stdout/disk serialization and writes fall
+outside; API input parsing done by the caller also falls outside. This is not an
+end-to-end shell-command deadline. Fork embedding in a multithreaded caller is
+not yet validated.
+
+The implementation's control suite covers changed/quiet inputs, ambiguity,
+alternative optima, positional/named black boxes, mixed-case role normalization
+and rejection, cold ordering fallback, corrupted witnesses/charges, supplied
+unions, exterior-only evidence, budgets, canonical CLI, JSON and saved views.
+The mathematical model follows the studied supplied-region portfolio; replacing
+its CP-SAT backend with SciPy/HiGHS has not reproduced its target-scale timing.
+No automatic discovery, private-case accuracy, integration maturity or electrical
+equivalence claim follows. The next useful evidence is an opt-in real canonical
+scope trial with status, cards, elapsed time and charges retained.
+
+Saved local views reconstruct proof/status consistency, inventory and parameter
+multisets, terminal focus, coverage sensitivity and complete deterministic cards
+from retained anonymous incidence and witnesses. Relabeling a lane, fabricating
+card evidence, changing its focus/meaning or weakening its charges is rejected.
+This checks internal consistency, not cryptographic authenticity of a wholly
+rewritten report and its source inputs.
