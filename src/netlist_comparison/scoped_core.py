@@ -217,6 +217,8 @@ def solve_milp(graph, coverage, seconds, forbidden=None):
         chosen = set(map(tuple, forbidden))
         constraint([(v, -1 if p in chosen else 1) for p, v in x.items()], lo=1 - len(chosen))
     matrix = coo_matrix((vv, (rr, cc)), shape=(len(lower), variables)).tocsc()
+    assembly_seconds = time.monotonic() - start
+    native_start = time.monotonic()
     # HiGHS receives threads=1; SciPy explicitly forwards unrecognized options.
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', message="Unrecognized options detected:.*threads")
@@ -225,6 +227,9 @@ def solve_milp(graph, coverage, seconds, forbidden=None):
                       options={'time_limit': max(.001, seconds), 'mip_rel_gap': 0.0, 'threads': 1})
     out = {'status': 'incomplete', 'proof': 'scipy_highs_milp', 'solver_status': int(solved.status),
            'seconds': time.monotonic() - start, 'query_seconds': seconds,
+           'assembly_seconds': assembly_seconds, 'native_seconds': time.monotonic()-native_start,
+           'model': {'variables': variables, 'constraints': len(lower), 'nonzeros': matrix.nnz,
+                     'leaf_pairs': len(x), 'net_pairs': len(y), 'terminal_pairs': len(z)},
            'objective': 'weighted' if coverage is None else 'fixed_coverage_error',
            'requested_coverage': coverage, 'message': str(solved.message)}
     if solved.x is not None and np.all(np.abs(solved.x - np.rint(solved.x)) <= 1e-6):
@@ -249,8 +254,9 @@ def solve_milp(graph, coverage, seconds, forbidden=None):
 
 class Executor:
     """One cold executor per supplied region; no process-global solution cache."""
-    def __init__(self, graph, deadline):
+    def __init__(self, graph, deadline, query_seconds=10.0):
         self.graph, self.deadline = graph, deadline
+        self.query_seconds = query_seconds
         self.cache = {}
         self.attempts = []
 
@@ -266,10 +272,12 @@ class Executor:
                      'lower_bound': bound['lower_bound'], 'certificate': bound,
                      'requested_coverage': coverage, 'solver_status': None}
             else:
-                q = solve_milp(graph, coverage, min(10., max(.001, self.deadline-time.monotonic())))
+                q = solve_milp(graph, coverage, min(self.query_seconds, max(.001, self.deadline-time.monotonic())))
             q = transfer(self.graph, graph, maps, q)
             self.attempts.append({'ordering': seed, 'status': q['status'], 'proof': q['proof'],
-                                  'requested_coverage': coverage, 'seconds': q.get('seconds', 0)})
+                                  'requested_coverage': coverage, 'seconds': q.get('seconds', 0),
+                                  'assembly_seconds': q.get('assembly_seconds',0), 'native_seconds':q.get('native_seconds',0),
+                                  'query_seconds':q.get('query_seconds'), 'model':q.get('model')})
             if q['status'] == 'optimal':
                 return q
         return {'status': 'incomplete', 'proof': 'ordering_portfolio_exhausted', 'requested_coverage': coverage}

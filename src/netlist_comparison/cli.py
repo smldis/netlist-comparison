@@ -56,7 +56,12 @@ Experimental supplied windows
   canonical files with --top-a/--top-b and optional per-side paths. Repeat paths
   only in this mode for unions. It makes no automatic global discovery or
   identity claim. --black-box-missing retains literal named/positional boundaries.
-  At most 64 leaves/64 nets per side, 16 counterparts, 12 cards/100 full A+B paths.
+  Defaults: 64 leaves/64 nets per side, 16 complete counterparts, 12 cards/100 full A+B paths.
+  --operator-leaves/--operator-nets/--operator-counterparts change admission without truncation.
+  --operator-retained-paths 200 permits a larger analyzed window while
+  --operator-presentation-paths 100 keeps the displayed inspection budget separate.
+  A certified result may have all cards omitted; hidden context is still charged.
+  --operator-query-seconds controls each native proof attempt (default 10 seconds).
   --operator-seconds 60 and --operator-memory-mib 3072 are configurable worker defaults, including CLI input loading and worker
   result encoding; final stdout/disk serialization is outside the deadline.
   POSIX /proc is required. Timeout, opaque or
@@ -206,6 +211,17 @@ def build_parser():
                         help='Regional only: minimum_raw reduces changed leaf rows within certified whole-component permutations; preserves structural ambiguity (default: existing)')
     search.add_argument('--operator-seconds', type=float, default=60.0, help='operator_scoped only: worker computation deadline including canonical loading (default:60 seconds); expiry is incomplete, never quiet; final stdout/disk serialization is outside this deadline')
     search.add_argument('--operator-memory-mib', type=integer(64), default=3072, help='operator_scoped only: worker RSS watchdog budget (default:3072 MiB; POSIX /proc required)')
+    for flag, default, meaning in (
+        ('leaves', 64, 'maximum represented leaves per side'),
+        ('nets', 64, 'maximum represented nets per side; all high-fanout nets retained'),
+        ('counterparts', 16, 'maximum complete compatible counterparts per endpoint; overflow abstains, never top-k pruning'),
+        ('retained-paths', 100, 'full member/scope/support path budget for each retained evidence lane'),
+        ('presentation-paths', 100, 'distinct charged A+B paths across displayed cards; hiding descendants never reduces charges'),
+        ('cards', 12, 'maximum displayed conditional cards')):
+        search.add_argument('--operator-' + flag, type=integer(1), default=default,
+                            help=f'operator_scoped only: {meaning} (default:{default})')
+    search.add_argument('--operator-query-seconds', type=float, default=10.0,
+                        help='operator_scoped only: maximum seconds per native solver attempt; worker deadline remains authoritative (default:10)')
     output.add_argument('--omit-parameters', action='store_true', help='operator_scoped only: architecture/environment cards without parameter-detail cards; full local parameter facts remain in JSON')
     defaults = Options()
     for name, help_text in BUDGET_HELP.items():
@@ -405,10 +421,14 @@ def main(argv=None):
     try:
         if args.context_mode != 'none' and args.matching_mode != 'fixed':
             parser.error('--context-mode frozen_neighbors requires --matching-mode fixed; omit --context-mode for other modes.')
-        if args.matching_mode != 'operator_scoped' and (args.omit_parameters or args.operator_seconds != 60.0 or args.operator_memory_mib != 3072):
-            parser.error('--operator-seconds/--operator-memory-mib/--omit-parameters require --matching-mode operator_scoped')
+        if args.matching_mode != 'operator_scoped' and (args.omit_parameters or args.operator_seconds != 60.0 or args.operator_memory_mib != 3072 or (args.operator_leaves,args.operator_nets,args.operator_counterparts,args.operator_retained_paths,args.operator_presentation_paths,args.operator_cards,args.operator_query_seconds)!=(64,64,16,100,100,12,10.0)):
+            parser.error('--operator-* and --omit-parameters require --matching-mode operator_scoped')
         options = Options(matching_mode=args.matching_mode, context_mode=args.context_mode,
                           operator_time_limit=args.operator_seconds, operator_memory_mib=args.operator_memory_mib, operator_parameters=not args.omit_parameters,
+                          operator_max_leaves=args.operator_leaves, operator_max_nets=args.operator_nets,
+                          operator_max_counterparts=args.operator_counterparts, operator_retained_paths=args.operator_retained_paths,
+                          operator_presentation_paths=args.operator_presentation_paths, operator_max_cards=args.operator_cards,
+                          operator_query_seconds=args.operator_query_seconds,
                           component_presentation=args.component_presentation,
                           black_box_missing=args.black_box_missing,
                           **{name: getattr(args, name) for name in BUDGET_HELP})

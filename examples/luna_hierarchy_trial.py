@@ -397,6 +397,20 @@ def run(args: argparse.Namespace) -> None:
             "--black-box-missing",
             "--matching-mode",
             "operator_scoped",
+            "--operator-leaves",
+            str(args.leaves),
+            "--operator-nets",
+            str(args.nets),
+            "--operator-counterparts",
+            str(args.counterparts),
+            "--operator-retained-paths",
+            str(args.retained_paths),
+            "--operator-presentation-paths",
+            str(args.presentation_paths),
+            "--operator-cards",
+            str(args.cards),
+            "--operator-query-seconds",
+            str(args.query_seconds),
             "--operator-seconds",
             str(args.seconds),
             "--operator-memory-mib",
@@ -426,6 +440,12 @@ def run(args: argparse.Namespace) -> None:
                 observed_peak_rss_kib=extension["resources"].get(
                     "observed_peak_rss_kib"
                 ),
+                limits=extension["limits"],
+                omitted_lanes=[
+                    omitted
+                    for window in extension["windows"]
+                    for omitted in window.get("omitted", [])
+                ],
             )
         else:
             item["error"] = completed.stderr[-2000:]
@@ -476,6 +496,13 @@ def parser() -> argparse.ArgumentParser:
     execute.add_argument("directory", type=Path)
     execute.add_argument("--seconds", type=float, default=180)
     execute.add_argument("--memory-mib", type=int, default=3072)
+    execute.add_argument("--leaves", type=int, default=64)
+    execute.add_argument("--nets", type=int, default=96)
+    execute.add_argument("--counterparts", type=int, default=16)
+    execute.add_argument("--retained-paths", type=int, default=200)
+    execute.add_argument("--presentation-paths", type=int, default=200)
+    execute.add_argument("--cards", type=int, default=12)
+    execute.add_argument("--query-seconds", type=float, default=5)
     return root
 
 
@@ -491,9 +518,13 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "validate":
             validate(args.directory.resolve())
         else:
-            if args.seconds <= 0 or args.memory_mib < 64:
+            if (args.seconds <= 0 or args.memory_mib < 64 or
+                    any(getattr(args, name) <= 0 for name in
+                        ("leaves", "nets", "counterparts", "retained_paths",
+                         "presentation_paths", "cards", "query_seconds")) or
+                    args.presentation_paths > args.retained_paths):
                 raise ValueError(
-                    "run resources must be positive; memory must be at least 64 MiB"
+                    "run budgets must be positive, presentation paths cannot exceed retained paths, and memory must be at least 64 MiB"
                 )
             run(args)
     except (

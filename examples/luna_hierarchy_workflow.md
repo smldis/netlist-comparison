@@ -51,6 +51,14 @@ python examples/luna_hierarchy_trial.py run "$TRIAL" \
   --seconds 180 --memory-mib 3072
 ```
 
+The workflow's exploratory run defaults are 64 leaves, 96 nets, 16 complete
+counterparts, 200 retained paths, 200 displayed charged paths, 12 cards, and a
+5-second ceiling for each native solver attempt. These are explicit paid limits,
+not confidence settings. Use `--presentation-paths 100` for the stricter view;
+the exact comparison is unchanged, but complete support above 100 is omitted from
+display. Override the other dimensions with `--leaves`, `--nets`,
+`--counterparts`, `--retained-paths`, `--cards`, or `--query-seconds`.
+
 Read `trial-summary.json` first. It records one exact status per proposed window,
 with card lanes, charged-path count, time, and memory. Full evidence is under
 `results/`. A certified window with no cards means only that represented local
@@ -62,4 +70,3 @@ have broken path equality. Deterministic enumeration is the ordinary source for
 stable same-path scopes. Current `operator_scoped` admission and evidence limits
 remain authoritative; proposal validation at the leaf cap does not guarantee that
 a window will pass net, ambiguity, counterpart, or charged-path limits.
-

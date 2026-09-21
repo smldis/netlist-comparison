@@ -187,15 +187,18 @@ def summary(report, limit, output=None):
 
 def operator_summary(extension, limit=10, output=None):
     cards = extension['cards']
+    limits=extension['limits']
     used = {s:{p for c in cards for p in c['charged_paths'][s]} for s in ('a','b')}
     lines = ['Experimental operator-scoped inspection; supplied regions, no global identity/discovery.',
              f"Status: {extension['status']}; internal proof certified: {extension['certified_internal']}",
-             f"Conditional cards: {len(cards)}; full charged A+B paths: {sum(map(len,used.values()))}/100 (maximum 12 cards)."]
+             f"Conditional cards: {len(cards)}; full charged A+B paths: {sum(map(len,used.values()))}/{limits['charged_paths']} (maximum {limits['cards']} cards)."]
     for window in extension.get('windows',[]):
         for side in ('a','b'):
             roots=window['supplied_scopes'][side]
             lines.append(f"{side.upper()} supplied scopes: " + ', '.join(roots[:limit]) + (f"; {len(roots)-limit} more in JSON" if len(roots)>limit else ''))
-        lines.append(f"Full member/scope charge before exterior support: {window['full_member_scope_charge']}/100.")
+        lines.append(f"Full member/scope charge before exterior support: {window['full_member_scope_charge']}/{limits.get('retained_paths',100)} retained context paths.")
+        if window.get('admission',{}).get('reasons'):
+            lines.append('All admission failures: '+', '.join(window['admission']['reasons'])+'.')
         proof=window.get('hypotheses',{})
         if proof:
             lines.append(f"K={proof['K']}; weighted={proof['weighted']['status']}; K proof={proof['maximum_coverage']['status']}; K-1={proof['one_pair_less']['status'] if proof['one_pair_less'] else 'not applicable'}.")

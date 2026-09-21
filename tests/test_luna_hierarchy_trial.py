@@ -167,4 +167,7 @@ Xnew in out CELL
     assert summary["proposal_count"] == 1
     assert summary["results"][0]["returncode"] == 0
     assert summary["results"][0]["status"] == "certified"
+    assert summary["results"][0]["limits"]["nets_per_side"] == 96
+    assert summary["results"][0]["limits"]["retained_paths"] == 200
+    assert summary["results"][0]["limits"]["charged_paths"] == 200
     assert (trial / "results" / "P001.json").is_file()

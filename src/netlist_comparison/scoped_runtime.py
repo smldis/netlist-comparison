@@ -40,13 +40,14 @@ def bounded(request, options):
     start = time.monotonic()
     if os.name != 'posix' or not Path('/proc/self/status').exists() or 'fork' not in multiprocessing.get_all_start_methods():
         raise ValueError('operator_scoped currently requires POSIX fork and /proc for its deadline/RSS worker watchdog')
-    reason, peak = None, 0
+    reason, peak, tree_peak = None, 0, 0
     with tempfile.TemporaryDirectory(prefix='netlist-scoped-') as folder:
         process = multiprocessing.get_context('fork').Process(target=_worker, args=(request, folder))
         process.start()
         try:
             while process.is_alive():
                 peak = max(peak, _memory(process.pid))
+                tree_peak = max(tree_peak, _memory(os.getpid()) + _memory(process.pid))
                 if time.monotonic() - start >= options.operator_time_limit:
                     reason = 'deadline_exhausted'; break
                 if peak > options.operator_memory_mib * 1024:
@@ -70,6 +71,7 @@ def bounded(request, options):
                 reason = 'deadline_exhausted'
             result = incomplete_report(request, reason) if reason else data['ok']
             result['operator_scoped']['resources'].update(
+                observed_parent_worker_rss_upper_kib=tree_peak,
                 elapsed_seconds=time.monotonic()-start, configured_seconds=options.operator_time_limit,
                 configured_memory_mib=options.operator_memory_mib, observed_peak_rss_kib=max(peak, result['operator_scoped']['resources'].get('worker_peak_rss_kib',0)),
                 enforcement='Isolated worker, parent monotonic deadline and /proc RSS watchdog sampled every 20 ms; one CPU. Final stdout/disk I/O is outside computation deadline.',

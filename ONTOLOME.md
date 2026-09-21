@@ -484,3 +484,19 @@ would be invented rather than defensible. Public tests cover preparation from a
 selected subtree, general one-to-many validation, unsafe result-name rejection,
 and a complete tiny conditional comparison. Workplace usefulness and private
 naming stability remain unmeasured; prototype maturity is unchanged.
+
+## Experimental budget separation
+
+The opt-in operator-scoped prototype now distinguishes solver leaf/net/counterpart
+admission, retained evidence support and charged presentation. Old defaults remain
+unchanged. A larger analyzed window may have a certified proof and no affordable
+card; those outcomes are reported separately. Complete candidate classes and nets
+remain intact, and all admission failures are visible. Raw catalogs/exterior
+incidence remain audit context, with separate byte/resource limits.
+
+This challenges the earlier coupling in which a presentation ceiling prevented
+backend analysis. It does not establish that larger regions yield useful operator
+locations: overlap grouping, complete support charging and private correspondence
+remain separate questions. Phase/model/RSS diagnostics make that hypothesis
+inspectable. Exact objectives, proof prerequisites and unresolved identity remain
+unchanged; new capacity is not a new correspondence claim.

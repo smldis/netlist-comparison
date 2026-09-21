@@ -21,6 +21,36 @@ LIMITS = {'leaves_per_side': 64, 'nets_per_side': 64, 'counterparts_per_endpoint
           'cards': 12, 'charged_paths': 100}
 
 
+def limits_for(options):
+    return {'leaves_per_side': options.operator_max_leaves, 'nets_per_side': options.operator_max_nets,
+            'counterparts_per_endpoint': options.operator_max_counterparts, 'cards': options.operator_max_cards,
+            'charged_paths': options.operator_presentation_paths, 'retained_paths': options.operator_retained_paths}
+
+
+def budget_details(window, limits):
+    """All admission predicates, independent of their first-failure status."""
+    graph=window['anonymous_input']; cc=counts(graph)
+    base={s:set(window['members'][s])|set(window['supplied_scopes'][s]) for s in ('a','b')}
+    measured={'leaves_per_side':{s:len(graph[s]['objects']) for s in ('a','b')},
+              'nets_per_side':{s:graph[s]['net_count'] for s in ('a','b')},
+              'counterparts_per_endpoint':{s:max((cc['b' if s=='a' else 'a'][sig] for sig in cc[s]),default=0) for s in ('a','b')},
+              'internal_context_paths':sum(map(len,base.values())),
+              'environment_context_paths':sum(len(base[s]|set(window['exterior'][s]['witness_paths'])) for s in ('a','b'))}
+    reasons=[]
+    if not window['admission']['expansion_complete']:reasons.append('incomplete_expansion')
+    if any(window['admission']['opaque_paths'][s] for s in ('a','b')):reasons.append('opaque_scope_abstention')
+    if measured['internal_context_paths']>limits.get('retained_paths',100):reasons.append('scope_path_budget_abstention')
+    for field,reason in (('leaves_per_side','leaf_budget_abstention'),('nets_per_side','net_budget_abstention'),
+                         ('counterparts_per_endpoint','counterpart_budget_abstention')):
+        if max(measured[field].values())>limits[field]:reasons.append(reason)
+    return measured,reasons
+
+
+def admission_status(reasons):
+    if not reasons:return None
+    return 'domain_budget_abstention' if reasons[0] in ('leaf_budget_abstention','net_budget_abstention') else reasons[0]
+
+
 def bounded_compare(a, b, *, top_a, top_b, options, scope_a, scope_b,
                     paths_a=(), paths_b=(), same_full_netlist=False):
     for paths in (paths_a, paths_b):
@@ -63,8 +93,8 @@ def incomplete_report(request, reason):
               'unpaired_endpoints_a': [], 'unpaired_endpoints_b': [], 'meaning': 'No global endpoint correspondence is selected.'},
               'hierarchy': {'conditional_on_pair_ids': [], 'memberships': [], 'occurrence_options': [], 'definition_options': []},
               'metrics': {'screening_complete': False, 'seconds': {}},
-              'operator_scoped': {'schema_version': 1, 'status': reason, 'certified_internal': False,
-                                  'limits': dict(LIMITS), 'windows': [], 'cards': [], 'charged_paths': {'a': [], 'b': []},
+              'operator_scoped': {'schema_version': 2, 'status': reason, 'certified_internal': False,
+                                  'limits': limits_for(options), 'windows': [], 'cards': [], 'charged_paths': {'a': [], 'b': []},
                                   'charged_count': 0, 'resources': {}, 'global_correspondence': 'not_attempted',
                                   'meaning': 'Conditional local evidence, not identity, edit history or electrical equivalence.'}}
     for s in ('a', 'b'):
@@ -224,19 +254,27 @@ def _terminal_evidence(window):
                                       'meaning':'Necessary at maximum literal-compatible coverage; this focus is one optimum plus endpoint/compatible rivals, not unique edit identity.'})
 
 
-def _present(window, parameters_enabled):
+def _present(window, parameters_enabled, limits=None):
     """Deterministic indivisible cards, reconstructed also when reading saved JSON."""
+    limits=LIMITS if limits is None else limits
     window['cards']=[];window['omitted']=[]
     addresses=window['members'];roots=window['supplied_scopes'];ext=window['exterior']
     charge={s:sorted(set(addresses[s])|set(roots[s])) for s in ('a','b')}
     def add_card(lane,evidence,charged,focus=None):
         combined={s:set(charged[s])|{p for c in window['cards'] for p in c['charged_paths'][s]} for s in ('a','b')}
-        if sum(map(len,combined.values()))>100 or len(window['cards'])>=12:
+        if sum(map(len,combined.values()))>limits['charged_paths'] or len(window['cards'])>=limits['cards']:
             window['omitted'].append({'lane':lane,'reason':'full_support_path_budget'});return
         focus=focus or {s:sorted({addresses[s][i] for e in evidence for i in e.get('focus',{}).get(s,[])}) for s in ('a','b')}
         window['cards'].append({'id':window['id']+':'+lane,'window_id':window['id'],'lane':lane,'channel':'environment' if lane=='environment' else 'internal_content','evidence':evidence,'focus_paths':focus,
                                'charged_paths':charged,'charged_count':sum(len(set(x)) for x in charged.values()),'status':'conditional',
                                'identity_claim':False,'uniqueness_claim':False,'confirmed_design_change_claim':False,'alternatives':window['alternatives']})
+    if 'retained_paths' in limits:
+        window['retention']={'internal_context_paths':sum(map(len,charge.values())),
+                             'environment_context_paths':sum(len(set(charge[s])|set(ext[s]['witness_paths'])) for s in ('a','b')),
+                             'limit':limits['retained_paths'],
+                             'meaning':'Evidence-lane support budgets; raw source catalogs and exterior endpoint records remain audit data.'}
+        window['retention']['internal_within_budget']=window['retention']['internal_context_paths']<=limits['retained_paths']
+        window['retention']['environment_within_budget']=window['retention']['environment_context_paths']<=limits['retained_paths']
     if window['evidence']:add_card('architecture',window['evidence'],charge)
     if window['parameter_evidence'] and parameters_enabled:add_card('parameter_detail',window['parameter_evidence'],charge)
     if all(ext[s]['complete'] for s in ('a','b')):
@@ -248,11 +286,16 @@ def _present(window, parameters_enabled):
 
 def _execute(request):
     start=time.monotonic();options=request['options'];deadline=start+options.operator_time_limit
+    phases={};phase_start=start;limits=limits_for(options)
+    def phase(name):
+        nonlocal phase_start
+        now=time.monotonic();phases[name]=now-phase_start;phase_start=now
     if 'files' in request:
         from .cli import load_netlist,choose_top
         files=request['files'];a=load_netlist(files['a'],files['format']);b=load_netlist(files['b'],files['format']) if files['b'] else a
         request={**request,'a':a,'b':b,'top_a':choose_top(a,request['top_a'],'--top-a' if files['b'] else '--top'),
                  'top_b':choose_top(b,request['top_b'],'--top-b' if files['b'] else '--top')}
+    phase('load')
     a,b=request['a'],request['b'];views={};roots={};selections={}
     for s,data in (('a',a),('b',b)):
         views[s],roots[s],selections[s]=_select(data,request['top_'+s],request.get('paths_'+s,()),request['scope_'+s],options)
@@ -266,6 +309,7 @@ def _execute(request):
             for leaf in view.leaves:
                 if leaf.opaque == 'incompatible_black_box_interfaces':
                     leaf.opaque = None
+    phase('selection_and_interfaces')
     graph,addresses,net_addresses=encode(views)
     charge={s:sorted(set(addresses[s])|set(roots[s])) for s in ('a','b')};cost=sum(map(len,charge.values()))
     result=incomplete_report(request,'pending');result['input_identity']={'kind':'retained_canonical_data_sha256','a':identity(a),'b':identity(b)}
@@ -275,10 +319,12 @@ def _execute(request):
             disposition=[{'object':l.path,'status':'opaque' if l.opaque else 'unresolved','group':None,'reason':l.opaque or 'global_identity_not_attempted_in_operator_scoped_mode'} for l in view.leaves])
         if view.selection:side['selection']=view.selection
         result[s]=side
+    phase('encoding_and_catalogs')
     ext={};unknown=[]
     for s,data in (('a',a),('b',b)):
         ext[s]=_exterior(data,request['top_'+s],views[s],roots[s],selections[s],request['scope_'+s],options)
     validate_exterior(ext)
+    phase('exterior_incidence')
     window={'id':'local0','supplied_scopes':roots,'scope_correspondence':'operator input; not discovered','members':addresses,'net_addresses':net_addresses,
             'selections':selections,'anonymous_input':graph,'input_sha256':digest(graph),'full_member_scope_charge':cost,'exterior':ext,
             'alternatives':ALTERNATIVES,
@@ -286,23 +332,24 @@ def _execute(request):
             'admission':{'expansion_complete':all(not v.budget_exhausted for v in views.values()),
                          'opaque_paths':{s:[l.path for l in views[s].leaves if l.opaque] for s in ('a','b')}},
             'interface_limitations':{s:[u for u in views[s].unresolved if u['reason']=='incompatible_black_box_interfaces'] for s in ('a','b')}}
-    if any(view.budget_exhausted for view in views.values()):status='incomplete_expansion'
-    elif any(leaf.opaque for view in views.values() for leaf in view.leaves):status='opaque_scope_abstention'
-    elif cost>100:status='scope_path_budget_abstention'
-    else:
+    measured,reasons=budget_details(window,limits)
+    window['admission'].update(observed=measured,reasons=reasons)
+    status=admission_status(reasons)
+    if not any(r in reasons for r in ('incomplete_expansion','opaque_scope_abstention','scope_path_budget_abstention')):
         window['evidence'],window['parameter_evidence']=facts(graph)
-        cc=counts(graph)
-        if any(len(graph[s]['objects'])>64 or graph[s]['net_count']>64 for s in ('a','b')):status='domain_budget_abstention'
-        elif any(max((cc['b' if s=='a' else 'a'][sig] for sig in cc[s]),default=0)>16 for s in ('a','b')):status='counterpart_budget_abstention'
-        else:
-            proof=Executor(graph,deadline).run();window['hypotheses']=proof;status='certified' if proof['certified'] else 'proof_budget_abstention'
+    phase('admission_and_facts')
+    if status is None:
+        proof=Executor(graph,deadline,options.operator_query_seconds).run()
+        window['hypotheses']=proof;status='certified' if proof['certified'] else 'proof_budget_abstention'
+    phase('proofs')
     window['status']=status
     _terminal_evidence(window)
-    _present(window, options.operator_parameters)
+    _present(window, options.operator_parameters,limits)
+    phase('presentation')
     used={s:sorted({p for c in window['cards'] for p in c['charged_paths'][s]}) for s in ('a','b')}
     extension=result['operator_scoped'];extension.update(status=status,certified_internal=status=='certified',windows=[window],cards=window['cards'],charged_paths=used,charged_count=sum(map(len,used.values())))
     extension['parameter_detail_enabled']=options.operator_parameters
-    extension['resources'].update(core_seconds=time.monotonic()-start,solver='scipy.optimize.milp/HiGHS; mathematical attaining-bound certificates first',cold_start=True,worker_count=1)
+    extension['resources'].update(core_seconds=time.monotonic()-start,phase_seconds=phases,query_seconds=options.operator_query_seconds,solver='scipy.optimize.milp/HiGHS; mathematical attaining-bound certificates first',cold_start=True,worker_count=1)
     result['metrics']['seconds']['operator_scoped']=time.monotonic()-start
     if views['a'].selection and views['b'].selection:
         from .boundary import boundary_report
@@ -332,9 +379,15 @@ def _finite_saved_number(value):
 def _validate_saved_extension(extension):
     """Validate local witnesses and indivisible path charges when viewing JSON."""
     from .scoped_core import validate_witness, capacity_bound, cardinality
-    if not isinstance(extension,dict) or extension.get('schema_version')!=1 or not isinstance(extension.get('windows'),list) or not isinstance(extension.get('cards'),list):
+    if not isinstance(extension,dict) or extension.get('schema_version') not in (1,2) or not isinstance(extension.get('windows'),list) or not isinstance(extension.get('cards'),list):
         raise ValueError('invalid operator_scoped extension')
-    if extension.get('limits')!=LIMITS or extension.get('global_correspondence')!='not_attempted':
+    limits=extension.get('limits');version=extension['schema_version']
+    expected_keys=set(LIMITS)|({'retained_paths'} if version==2 else set())
+    if (not isinstance(limits,dict) or set(limits)!=expected_keys or
+            any(type(v) is not int or v<=0 for v in limits.values()) or
+            (version==1 and limits!=LIMITS) or
+            (version==2 and limits['charged_paths']>limits['retained_paths']) or
+            extension.get('global_correspondence')!='not_attempted'):
         raise ValueError('invalid local contract/limits')
     if type(extension.get('certified_internal')) is not bool:
         raise ValueError('invalid local certification flag')
@@ -407,17 +460,13 @@ def _validate_saved_extension(extension):
             raise ValueError('invalid local scope charge/identity contract')
         if any(len(window['members'][s])!=len(graph[s]['objects']) or len(set(window['members'][s]))!=len(window['members'][s]) for s in ('a','b')):
             raise ValueError('invalid local membership addresses')
-        if not admission['expansion_complete']:status='incomplete_expansion'
-        elif any(admission['opaque_paths'][s] for s in ('a','b')):status='opaque_scope_abstention'
-        elif cost>100:status='scope_path_budget_abstention'
-        elif any(len(graph[s]['objects'])>64 or graph[s]['net_count']>64 for s in ('a','b')):status='domain_budget_abstention'
-        else:
-            cc=counts(graph)
-            if any(max((cc['b' if s=='a' else 'a'][sig] for sig in cc[s]),default=0)>16 for s in ('a','b')):
-                status='counterpart_budget_abstention'
-            else:
-                if not proof:raise ValueError('local proof status missing')
-                status='certified' if proof['certified'] else 'proof_budget_abstention'
+        measured,reasons=budget_details(window,limits)
+        if version==2 and (admission.get('observed')!=measured or admission.get('reasons')!=reasons):
+            raise ValueError('local admission reasons/counts do not reconstruct')
+        status=admission_status(reasons)
+        if status is None:
+            if not proof:raise ValueError('local proof status missing')
+            status='certified' if proof['certified'] else 'proof_budget_abstention'
         if window['status']!=status or extension['status']!=status or extension['certified_internal'] is not (status=='certified'):
             raise ValueError('inconsistent local status/certification')
         if status not in ('certified','proof_budget_abstention') and proof:
@@ -429,8 +478,8 @@ def _validate_saved_extension(extension):
         _terminal_evidence(expected)
         for key in ('evidence','parameter_evidence','coverage_sensitivity'):
             if window.get(key)!=expected.get(key):raise ValueError('local evidence/focus does not reconstruct from original incidence and proofs')
-        _present(expected,extension['parameter_detail_enabled'])
-        if window['cards']!=expected['cards'] or window['omitted']!=expected['omitted']:
+        _present(expected,extension['parameter_detail_enabled'],limits)
+        if window['cards']!=expected['cards'] or window['omitted']!=expected['omitted'] or window.get('retention')!=expected.get('retention'):
             raise ValueError('local card lane/evidence/focus/charge does not match retained window evidence')
         expected_cards.extend(expected['cards'])
     if extension['cards']!=expected_cards:
@@ -447,6 +496,6 @@ def _validate_saved_extension(extension):
                 raise ValueError('incomplete local context/support charge')
             used[s].update(expected)
         if card['charged_count']!=sum(len(set(card['charged_paths'][s])) for s in ('a','b')):raise ValueError('incorrect card charge')
-    if len(extension['cards'])>12 or sum(map(len,used.values()))>100 or extension['charged_count']!=sum(map(len,used.values())):
+    if len(extension['cards'])>limits['cards'] or sum(map(len,used.values()))>limits['charged_paths'] or extension['charged_count']!=sum(map(len,used.values())):
         raise ValueError('invalid local presentation budget')
     if any(set(extension['charged_paths'][s])!=used[s] for s in ('a','b')):raise ValueError('invalid local union charge')

@@ -158,9 +158,9 @@ def test_deadline_is_incomplete_and_configured_minutes_retained(monkeypatch):
     monkeypatch.setattr(operator_scoped,'_execute',original)
     real=operator_scoped.Executor
     class CheckDeadline(real):
-        def __init__(self,graph,deadline):
+        def __init__(self,graph,deadline,query_seconds=10):
             assert deadline-time.monotonic()>100
-            super().__init__(graph,deadline)
+            super().__init__(graph,deadline,query_seconds)
     monkeypatch.setattr(operator_scoped,'Executor',CheckDeadline)
     result=compare_text('R1 a b 1k\n',operator_time_limit=120)['operator_scoped']
     assert result['certified_internal'] and result['resources']['configured_seconds']==120
@@ -335,3 +335,88 @@ def test_direct_saved_validator_rejects_nonfinite_objectives_and_certificates(fi
     if field=='certificate':q[field]['full_cost']=float('nan')
     else:q[field]=float('nan')
     with pytest.raises(ValueError,match='non-finite'):validate_saved_extension(ext)
+
+
+def test_separate_budgets_certify_but_omit_over_budget_presentation():
+    result=compare_text('R1 a b 1k\nC1 b c 1p\n','R1 a b 2k\nC1 b c 1p\n',
+                        operator_retained_paths=200,operator_presentation_paths=4)
+    ext=result['operator_scoped'];w=ext['windows'][0]
+    assert ext['certified_internal'] and not ext['cards']
+    assert w['parameter_evidence'] and w['full_member_scope_charge']==6
+    assert w['omitted']==[{'lane':'parameter_detail','reason':'full_support_path_budget'}]
+    assert w['admission']['reasons']==[] and w['retention']['internal_within_budget']
+    validate_saved_extension(ext)
+    from netlist_comparison.terminal import operator_summary
+    assert '/4 (maximum 12 cards)' in operator_summary(ext)
+    for field in ('charged_paths','retained_paths','nets_per_side'):
+        broken=copy.deepcopy(ext);broken['limits'][field]=False
+        with pytest.raises(ValueError):validate_saved_extension(broken)
+    broken=copy.deepcopy(ext);broken['limits']['charged_paths']=200
+    with pytest.raises(ValueError,match='card'):validate_saved_extension(broken)
+    broken=copy.deepcopy(ext);broken['windows'][0]['admission']['reasons']=['net_budget_abstention']
+    with pytest.raises(ValueError,match='admission'):validate_saved_extension(broken)
+    broken=copy.deepcopy(ext);broken['windows'][0]['retention']['internal_context_paths']=2
+    with pytest.raises(ValueError):validate_saved_extension(broken)
+
+
+def test_all_admission_failures_retained_without_truncation():
+    ext=compare_text('R1 a b 1k\nR2 b c 1k\n',operator_max_leaves=1,operator_max_nets=1,
+                     operator_max_counterparts=1,operator_retained_paths=3,operator_presentation_paths=3)['operator_scoped']
+    w=ext['windows'][0]
+    assert ext['status']=='scope_path_budget_abstention' and not ext['certified_internal']
+    assert w['admission']['reasons']==['scope_path_budget_abstention','leaf_budget_abstention',
+                                     'net_budget_abstention','counterpart_budget_abstention']
+    assert len(w['anonymous_input']['a']['objects'])==2 and not w['hypotheses']
+    validate_saved_extension(ext)
+
+
+def test_old_defaults_and_legacy_saved_extension():
+    from netlist_comparison.operator_scoped import LIMITS,limits_for
+    assert limits_for(Options())=={**LIMITS,'retained_paths':100}
+    ext=compare_text('R1 a b 1k\n')['operator_scoped']
+    old=copy.deepcopy(ext);old['schema_version']=1;old['limits']=dict(LIMITS)
+    for w in old['windows']:
+        w.pop('retention');w['admission'].pop('observed');w['admission'].pop('reasons')
+    validate_saved_extension(old)
+    assert ext['certified_internal'] and not ext['cards']
+    budget=compare_text('R1 a b 1k\n',operator_max_nets=1)['operator_scoped']
+    assert budget['status']=='domain_budget_abstention' and not budget['certified_internal']
+    validate_saved_extension(budget)
+
+
+@pytest.mark.parametrize('field,value', [('operator_max_leaves',0),('operator_max_nets',True),
+    ('operator_max_counterparts',1.5),('operator_retained_paths',-1),('operator_presentation_paths',101),
+    ('operator_max_cards',0),('operator_query_seconds',float('nan')),('operator_query_seconds',float('inf'))])
+def test_invalid_separate_budget_options(field,value):
+    with pytest.raises(ValueError):Options(**{field:value})
+
+
+def test_configured_query_cap_and_model_instrumentation(monkeypatch):
+    g=graph([('r',0,1)],[('r',0,0)])
+    original=core.solve_milp;calls=[]
+    def recorded(graph,coverage,seconds,forbidden=None):
+        calls.append(seconds);return original(graph,coverage,seconds,forbidden)
+    monkeypatch.setattr(core,'solve_milp',recorded)
+    executor=core.Executor(g,time.monotonic()+5,query_seconds=.4)
+    proof=executor.search(None)
+    assert proof['status']=='optimal' and calls and all(0<x<=.4 for x in calls)
+    native=[a for a in executor.attempts if a['model']]
+    assert native and native[0]['model']['variables']>0 and native[0]['assembly_seconds']>=0
+
+
+def test_scaling_cli_help_and_json(tmp_path,capsys):
+    from netlist_comparison.cli import main
+    with pytest.raises(SystemExit) as done:main(['--help'])
+    assert done.value.code==0
+    helptext=capsys.readouterr().out
+    for flag in ('--operator-nets','--operator-retained-paths','--operator-presentation-paths','--operator-query-seconds'):
+        assert flag in helptext
+    a=tmp_path/'a.sp';b=tmp_path/'b.sp'
+    a.write_text('R1 a b 1k\n');b.write_text('R1 a b 2k\n')
+    assert main([str(a),str(b),'--top-a','TOP','--top-b','TOP','--matching-mode','operator_scoped',
+                 '--operator-nets','96','--operator-retained-paths','200','--operator-presentation-paths','2',
+                 '--operator-query-seconds','5','--json'])==0
+    result=json.loads(capsys.readouterr().out)
+    assert result['operator_scoped']['limits']['nets_per_side']==96
+    assert result['operator_scoped']['certified_internal'] and not result['operator_scoped']['cards']
+    validate_saved_extension(result['operator_scoped'])

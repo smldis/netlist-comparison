@@ -860,3 +860,46 @@ from retained anonymous incidence and witnesses. Relabeling a lane, fabricating
 card evidence, changing its focus/meaning or weakening its charges is rejected.
 This checks internal consistency, not cryptographic authenticity of a wholly
 rewritten report and its source inputs.
+
+### Separate experimental computation and inspection budgets
+
+The old defaults remain 64 leaves, 64 nets, 16 complete counterparts, 100 retained
+context paths, 100 displayed charged paths and 12 cards. The opt-in scaling controls
+separate these limits; they do not prune a larger candidate class or drop nets:
+
+```sh
+netlist-compare before.canonical after.canonical --format canonical \
+  --top-a TOP --top-b TOP --path-a TOP/XBLOCK --path-b TOP/XBLOCK \
+  --black-box-missing --matching-mode operator_scoped \
+  --operator-leaves 64 --operator-nets 96 --operator-counterparts 16 \
+  --operator-retained-paths 200 --operator-presentation-paths 100 \
+  --operator-cards 12 --operator-seconds 60 --operator-query-seconds 5 \
+  --operator-memory-mib 3072 --output local.json --text
+```
+
+The Python `Options` fields are `operator_max_leaves`, `operator_max_nets`,
+`operator_max_counterparts`, `operator_retained_paths`,
+`operator_presentation_paths`, `operator_max_cards`, and `operator_query_seconds`.
+Presentation paths cannot exceed retained paths. The retained limit bounds the
+full member/scope support needed to analyze an internal window; exterior evidence
+uses its full member/scope/outside-witness charge. Raw source catalogs and complete
+outside-endpoint incidence remain audit data and are not truncated to this limit.
+Their serialized byte/resource bounds still apply. Retention is not a cap on every
+path string appearing anywhere in JSON.
+
+A larger window may certify yet expose no card in the strict presentation view.
+The result retains evidence, full support charges, every admission failure,
+proof/coverage status, and explicit lane omissions; it never reports hidden
+support as free. Increasing the display cap explicitly pays that larger inspection
+cost. A saved filter does not recompute matching or erase charges. Schema-2 local
+extensions retain the declared budgets and reconstruct their consistency; the
+reader continues to accept old schema-1 local extensions with fixed original caps.
+
+Phase timers distinguish loading, selection, catalogs, exterior incidence, admission,
+proofs and presentation. Native attempts report model dimensions and assembly/solver
+time. The sampled sum of parent and worker RSS high-water measurements is a
+conservative diagnostic (shared memory may be counted twice), not a new aggregate
+memory enforcement promise. The worker deadline/RSS watchdog remains authoritative.
+No source/result cache, candidate-ranking change, new lower bound or heuristic
+localization is introduced by these controls. Larger capacity has no general
+performance or private-accuracy guarantee.
