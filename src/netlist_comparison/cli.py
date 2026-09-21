@@ -65,6 +65,10 @@ Experimental supplied windows
   All weighted and K/K-1 proofs are required for terminal evidence. Equal
   boundary counts do not establish unchanged environment; alternatives remain
   unresolved. `view RESULT --category local --text` retains complete support.
+  If corresponding paths are not known, a repository clone also includes the
+  optional local-agent handoff at examples/luna_hierarchy_workflow.md. It uses a
+  Luna medium agent to propose bounded rename/move/split/merge windows, validates
+  them, then runs this mode. Proposals remain heuristics, never identities.
 
 Choose an input shape
   A B compares two revisions.  A --inspect only discovers circuits, paths and

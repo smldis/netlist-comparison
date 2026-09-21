@@ -468,3 +468,12 @@ API has not been validated.
 
 See [the detailed local contract](docs/index.md#operator-supplied-local-windows)
 for the objective, certificates, API, output limits and remaining gaps.
+
+When corresponding paths are not already known, the optional
+[local Luna hierarchy workflow](examples/luna_hierarchy_workflow.md) prepares a
+compact hierarchy handoff, validates tentative 1:1, split, and merge proposals,
+and runs each accepted window through `operator_scoped`. It is designed for a
+Luna medium agent in an authorized local environment where sensitive canonical
+inputs may be inspected. The manifest reduces reading cost rather than enforcing
+privacy, and neither the agent's proposal nor the conditional comparison result
+claims correspondence.

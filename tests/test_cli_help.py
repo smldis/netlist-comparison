@@ -27,7 +27,8 @@ def test_main_help_and_guide_cover_operator_decisions(capsys):
         assert '--black-box-missing' in text and '--matching-mode' in text
     for phrase in ('canonical', 'minimum_raw', 'surplus', 'zero pair rows',
                    'regional hard-admission failure', 'not a proved add/delete',
-                   'swap-work-limit', 'Python-only'):
+                   'swap-work-limit', 'Python-only',
+                   'examples/luna_hierarchy_workflow.md'):
         assert phrase in guide_text
 
 

@@ -466,3 +466,21 @@ and saved cards are reconstructed from incidence/proofs rather than trusted as
 independent assertions. Certification, lanes, focus, meaning and full charges
 must agree with that reconstruction. These are consistency guarantees, not
 authentication of an arbitrarily rewritten source report.
+
+## Local hierarchy-window handoff
+
+The repository also carries an optional, dependency-free example workflow for a
+local Luna agent to propose bounded supplied windows before `operator_scoped`
+comparison. Its compact hierarchy manifest is a reading-cost aid, not a privacy
+boundary: an authorized local agent may inspect the canonical inputs and results.
+The handoff validates hashes, paths, exact leaf charges, non-overlapping unions,
+and 1:1/1:n/n:1 proposal structure before execution. Luna's output remains a
+heuristic scope suggestion and never becomes correspondence evidence.
+
+Stable same-path scopes remain better served by deterministic enumeration. The
+agent pass is reserved for plausible rename, move, split, and merge cases where
+path equality fails, and it may supply fewer than five quiet controls when more
+would be invented rather than defensible. Public tests cover preparation from a
+selected subtree, general one-to-many validation, unsafe result-name rejection,
+and a complete tiny conditional comparison. Workplace usefulness and private
+naming stability remain unmeasured; prototype maturity is unchanged.
