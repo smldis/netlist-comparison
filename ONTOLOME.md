@@ -467,23 +467,42 @@ independent assertions. Certification, lanes, focus, meaning and full charges
 must agree with that reconstruction. These are consistency guarantees, not
 authentication of an arbitrarily rewritten source report.
 
-## Local hierarchy-window handoff
+## Local automatic hierarchy trial
 
-The repository also carries an optional, dependency-free example workflow for a
-local Luna agent to propose bounded supplied windows before `operator_scoped`
-comparison. Its compact hierarchy manifest is a reading-cost aid, not a privacy
-boundary: an authorized local agent may inspect the canonical inputs and results.
-The handoff validates hashes, paths, exact leaf charges, non-overlapping unions,
-and 1:1/1:n/n:1 proposal structure before execution. Luna's output remains a
-heuristic scope suggestion and never becomes correspondence evidence.
+The repository carries an optional example workflow that deterministically
+enumerates every affordable relative hierarchy path shared by two selected roots.
+This revises the earlier Luna-first handoff: stable hierarchy requires no agent
+ranking. Relative path equality remains supplied scope knowledge, never verified
+identity. Every window retains its independent anonymous graph, proof, report and
+abstentions while one explicit batch reuses immutable input preparation.
 
-Stable same-path scopes remain better served by deterministic enumeration. The
-agent pass is reserved for plausible rename, move, split, and merge cases where
-path equality fails, and it may supply fewer than five quiet controls when more
-would be invented rather than defensible. Public tests cover preparation from a
-selected subtree, general one-to-many validation, unsafe result-name rejection,
-and a complete tiny conditional comparison. Workplace usefulness and private
-naming stability remain unmeasured; prototype maturity is unchanged.
+A local Luna agent is reserved for unmatched frontier branches where rename,
+move, split or merge may have broken relative path equality. Its compact handoff
+is a reading-cost aid, not a privacy boundary; the authorized local agent may
+inspect complete sensitive inputs. Validation rejects shared paths and quiet
+controls, binds proposals to the handoff hash, and checks exact leaf charges,
+non-overlapping unions and general 1:1/1:n/n:1 structure. An agent proposal remains
+a heuristic supplied scope and never becomes correspondence evidence.
+
+The trial refuses more than its explicit total-window bound rather than ranking
+or truncating. Canonical input hashes, atomic non-overwriting output, complete
+per-window reports and an honest resource-stop receipt make one private run
+inspectable. The workflow opts into the exercised 64-leaf/96-net/16-counterpart/
+200-retained/100-presentation values without changing package defaults. Public
+tests cover both input shapes, explicit complete global-net scope, optional
+parameter omission, zero-proposal agent abstention, deterministic and unmatched
+selection, mutation and overwrite guards, a real mixed batch, and resource
+exhaustion without inferred quiet results. Compact summaries retain supplied
+paths for local navigation. Private usefulness and naming stability remain
+unmeasured; prototype maturity is unchanged.
+
+The first public usability run exposed that a technically valid handoff can fail
+at its human-agent seam: Luna searched for a top-level frontier array and the
+generated commands relied on an inherited development `PYTHONPATH`. The task now
+names all four side-qualified arrays, reports and requires confirmation of their
+counts before abstention, and emits commands bound only to the two discovered
+local package roots. Tests execute those commands with the ambient Python path
+removed.
 
 ## Experimental budget separation
 

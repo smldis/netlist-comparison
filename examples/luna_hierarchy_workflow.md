@@ -1,72 +1,137 @@
-# Local Luna hierarchy-window workflow
+# Local automatic hierarchy trial
 
-This optional workflow turns one canonical comparison into a compact hierarchy
-handoff for a local Luna medium agent, validates the agent's proposed windows,
-and runs `operator_scoped` on each accepted proposal. Luna proposes places to
-inspect. Neither its proposal nor a comparator card establishes correspondence,
-edit history, circuit behavior, or electrical equivalence.
+This optional workflow combines two bounded sources of `operator_scoped`
+comparison windows:
 
-The agent may inspect the complete inputs and results inside an authorized local
-environment, including sensitive design data. The hierarchy manifest reduces
-initial reading cost; it is not a privacy filter. The trial directory contains
-absolute input paths and design-derived data, so keep the directory local unless
-it has been reviewed for disclosure.
+1. every shared relative hierarchy path within the leaf cap, enumerated without
+   ranking or agent judgment;
+2. optional rename, move, split, and merge relations proposed by a local Luna
+   medium agent from unmatched hierarchy frontiers.
 
-Run the workflow from a clone with `netlist-comparison` and its normal dependencies
-installed. It adds no dependency beyond the package itself. For two instances in
-one canonical file:
+Both are supplied comparison scopes. Relative path equality and Luna proposals
+do not establish correspondence, edit history, unchanged behavior, or electrical
+equivalence. Each complete result retains the ordinary anonymous graph, admission
+record, exact proof, evidence lanes, support charges, and abstentions.
+
+The agent may inspect complete sensitive inputs and results inside an authorized
+local environment. The compact hierarchy files reduce initial reading cost; they
+are not privacy filters. The trial config contains absolute input paths and all
+artifacts contain design-derived data. Keep the directory local unless reviewed
+for disclosure.
+
+## Prepare
+
+Run from a clone with `netlist-comparison` and its normal dependencies installed.
+For two instances in one canonical file:
 
 ```sh
-TRIAL=/absolute/private/path/luna-netlist-trial
+TRIAL=/absolute/private/path/automatic-hierarchy-trial
 python examples/luna_hierarchy_trial.py prepare \
   --input-a /absolute/path/netlist.canonical --top-a TOP \
   --root-a TOP/XI0 --root-b TOP/XI1 --output "$TRIAL"
 ```
 
-For two revisions, supply `--input-a`, `--input-b`, `--top-a`, and `--top-b`.
-The roots are optional in that form; supplying them restricts each hierarchy
-manifest to the selected instance.
+For two revisions:
 
-Preparation writes `hierarchy-only-input.json`, `input.sha256`,
-`trial-config.json`, and `LUNA_TASK.md`. Start a Luna medium agent inside the
-authorized local environment, give it the trial directory, and ask it to follow
-`LUNA_TASK.md`. The generated task includes exact validation and run commands
-for the Python interpreter and checkout that prepared the handoff. It asks Luna
-to produce:
+```sh
+python examples/luna_hierarchy_trial.py prepare \
+  --input-a /absolute/path/before.canonical \
+  --input-b /absolute/path/after.canonical \
+  --top-a TOP --top-b TOP --globals-complete --omit-parameters \
+  --output "$TRIAL"
+```
 
-- `proposals.json`, containing tentative 1:1, 1:n, or n:1 windows;
-- `luna-report.md`, explaining how those windows were selected;
-- `luna-assessment.md`, interpreting the resulting comparator statuses without
-  promoting a proposal to known identity.
+`--globals-complete` says the declared list of global nets is complete. Ground
+`0` is always included, matching the comparator CLI. Thus the command above is
+the exact form for inputs with no global nets beyond ground. When other globals
+exist, repeat `--global-net`, for example
+`--global-net VDD --global-net VSS --globals-complete`. Omit
+`--globals-complete` if the declaration is incomplete or unknown. The scope is
+recorded in `trial-config.json`, used during preparation, and supplied unchanged
+to both sides of the comparison batch.
+This example is the architecture-first variant: `--omit-parameters` suppresses
+the parameter-evidence lane. Remove that flag when parameter-class evidence is
+wanted.
 
-The workflow accepts zero to ten quiet controls because a small design may not
-provide five defensible controls. It validates input hashes, exact leaf counts,
-the configured leaf cap, known paths, non-overlapping unions, safe unique IDs,
-unique priorities, and the proposal schema before comparison. Run the generated
-commands yourself if the agent stops after writing `proposals.json`:
+Optional roots restrict either revision to a selected instance. Preparation
+hashes the canonical files and writes:
+
+- `hierarchy-only-input.json`, with authored paths and case-insensitive relative
+  keys beneath each selected root;
+- `stable-windows.json`, containing every shared relative path with 1–64 leaves
+  per side, in deterministic order;
+- `unmatched-branch-input.json`, containing the first unmatched frontiers, their
+  shared-parent context, and eligible descendants;
+- `trial-config.json`, `input.sha256`, and a directly executable `LUNA_TASK.md`.
+
+The default hard bound is 256 total windows. Preparation refuses a larger stable
+set instead of truncating it. Shared paths outside the leaf cap remain recorded
+as excluded; net, counterpart, retained-path, and proof admission remain decisions
+of the comparator and therefore remain visible as result statuses.
+
+This workflow explicitly uses the experimentally exercised 64-leaf, 96-net,
+16-counterpart, 200-retained-path, and 100-presentation-path values. These are
+workflow values, not package defaults or general performance claims. All values
+are recorded in the config and can be changed explicitly during preparation.
+The parameter choice is recorded and reused by `run`.
+
+## Optional local Luna pass
+
+Start a Luna medium agent in the authorized environment, give it the trial
+directory, and ask it to follow `LUNA_TASK.md`. It may inspect the complete
+canonical inputs locally. It writes `proposals.json` and `luna-report.md`.
+The generated task names the exact `sides.a.*` and `sides.b.*` frontier and
+eligible-path arrays, records their counts, and requires Luna to confirm both
+sides before returning no proposals. Its literal validate/run commands set a
+quoted `PYTHONPATH` containing only the currently imported `netlist_comparison`
+and `spice_canonical` source roots, so a source checkout remains runnable from a
+clean shell without copying unrelated environment entries.
+
+The validator accepts zero to 50 general 1:1, 1:n, or n:1 proposals. An empty
+list is the correct answer when Luna finds no defensible unmatched relationship.
+Every proposed path
+must come from the handoff's unmatched eligible set, every same-side union must
+be non-overlapping, and leaf totals must be exact and within the cap. Shared
+relative paths and quiet controls are rejected because the deterministic pass
+already owns stable hierarchy.
+
+Validate manually when needed:
 
 ```sh
 python examples/luna_hierarchy_trial.py validate "$TRIAL"
-python examples/luna_hierarchy_trial.py run "$TRIAL" \
-  --seconds 180 --memory-mib 3072
 ```
 
-The workflow's exploratory run defaults are 64 leaves, 96 nets, 16 complete
-counterparts, 200 retained paths, 200 displayed charged paths, 12 cards, and a
-5-second ceiling for each native solver attempt. These are explicit paid limits,
-not confidence settings. Use `--presentation-paths 100` for the stricter view;
-the exact comparison is unchanged, but complete support above 100 is omitted from
-display. Override the other dimensions with `--leaves`, `--nets`,
-`--counterparts`, `--retained-paths`, `--cards`, or `--query-seconds`.
+## Run one batch
 
-Read `trial-summary.json` first. It records one exact status per proposed window,
-with card lanes, charged-path count, time, and memory. Full evidence is under
-`results/`. A certified window with no cards means only that represented local
-incidence produced no selected card under the supplied relationship. It does not
-prove equivalence or validate Luna's correspondence guess.
+After the optional Luna pass, one command loads the canonical inputs once and
+runs deterministic windows first, followed by validated Luna proposals:
 
-This pass is aimed at unmatched branches where rename, move, split, or merge may
-have broken path equality. Deterministic enumeration is the ordinary source for
-stable same-path scopes. Current `operator_scoped` admission and evidence limits
-remain authoritative; proposal validation at the leaf cap does not guarantee that
-a window will pass net, ambiguity, counterpart, or charged-path limits.
+```sh
+python examples/luna_hierarchy_trial.py run "$TRIAL"
+```
+
+If `proposals.json` is absent, this runs deterministic windows alone. The command
+uses one explicit `compare_operator_scoped_batch` call, whose reuse is limited to
+input identities and complete full-top exterior incidence. Every window still
+receives a new selection, anonymous graph, proof, and report.
+
+Complete reports are saved under `results/stable/` and `results/luna/`.
+`trial-summary.json` is a compact index with exact statuses, card lanes, charges,
+supplied A/B paths, report paths, and report hashes. This keeps both deterministic
+and Luna locations navigable without opening each full report. The directory is
+still sensitive local data. `batch-receipt.json` records the ordered IDs,
+reuse key, input identities, and resource envelope without duplicating evidence.
+Writes are atomic, and an existing result is not replaced unless `run --replace`
+is explicit.
+
+The input byte hashes are checked before execution. Every returned supplied scope
+and every saved local extension is validated before writing. An outer deadline,
+memory stop, worker failure, or serialization stop writes an incomplete summary
+and receipt with zero inferred per-window outcomes. The current batch API returns
+only after the whole batch completes, so no partial reports survive such a stop.
+
+A certified result with no cards means only “no selected cards under this supplied
+window and represented evidence.” It is not an unchanged or equivalence verdict.
+Read the complete result for abstentions, omitted lanes, proof status, and support
+charges. The Python batch API parses canonical files in the caller before its
+bounded worker; the receipt's worker limits do not include that parsing time.

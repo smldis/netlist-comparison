@@ -492,14 +492,18 @@ API has not been validated.
 See [the detailed local contract](docs/index.md#operator-supplied-local-windows)
 for the objective, certificates, API, output limits and remaining gaps.
 
-When corresponding paths are not already known, the optional
-[local Luna hierarchy workflow](examples/luna_hierarchy_workflow.md) prepares a
-compact hierarchy handoff, validates tentative 1:1, split, and merge proposals,
-and runs each accepted window through `operator_scoped`. It is designed for a
-Luna medium agent in an authorized local environment where sensitive canonical
-inputs may be inspected. The manifest reduces reading cost rather than enforcing
-privacy, and neither the agent's proposal nor the conditional comparison result
-claims correspondence.
+The optional [local automatic hierarchy trial](examples/luna_hierarchy_workflow.md)
+enumerates every shared relative hierarchy path within its leaf cap, then uses one
+explicit batch for those deterministic windows and optional validated Luna
+rename/move/split/merge proposals from unmatched branches. It supports two
+revisions and two instances in one file, writes a complete report per window, and
+retains hashes, abstentions and the batch resource receipt. Sensitive canonical
+inputs may be inspected by the authorized local agent. The manifest reduces
+reading cost rather than enforcing privacy, and neither relative path equality,
+an agent proposal, nor conditional comparison evidence claims correspondence.
+Use `prepare --globals-complete` when ground `0` is the complete global-net set;
+repeat `--global-net NAME` for any others. `prepare --omit-parameters` selects
+the architecture-first variant, and Luna may validly return no proposals.
 
 ### Separate experimental computation and inspection budgets
 
