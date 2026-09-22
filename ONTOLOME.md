@@ -425,3 +425,111 @@ that storage while preserving ordering, without imposing a new hard admission
 limit. Score budgets still do not bound total runtime or memory. Prototype maturity
 is unchanged. A next possibility is a small coupled structural proposal that can
 cross the remaining basin more effectively than leaf transpositions alone.
+
+## Supplied-region experimental contract
+
+An opt-in `operator_scoped` mode now separates the operator's knowledge of a
+region relationship from the comparator's evidence inside it. This revises the
+assumption that useful local inspection must wait for automatic global discovery.
+Supplied paths/top selections and unions are input knowledge, never recovered
+correspondence. Existing modes remain unchanged.
+
+The primary local model cannot see occurrence names, hierarchy paths or net
+spellings. It uses explicit whitelisted literal cell/interface semantics and
+original incidence, with case-consistent roles and collision rejection. A bounded
+exact binary leaf/net model, attaining-bound certificates and a cold anonymous
+ordering portfolio require weighted and K/K-1 optimality before necessary
+terminal evidence. SciPy/HiGHS carries the same objective with existing package
+dependencies; its target performance remains unmeasured. Alternative explanations
+remain unresolved. Local witnesses never become global representative pairs.
+
+Complete selected-member/scope/support charges bound conditional architecture,
+parameter and separate exterior cards. Sampled Linux worker time/RSS watchdogs
+make exhaustion observable; absence of cards is not a proof of unchanged design.
+The current exterior scalar only detects crossing-net count changes. Unknown
+label semantics, hidden internals, ambiguous exact explanations, budget overflow,
+final output I/O and fork-based embedding limits remain explicit. Source catalogs
+and saved views retain the paid context.
+
+Observed package controls exercise exact/quiet/changed cases, alternative optima,
+normalization, anonymous order fallback, corrupted evidence, exterior witnesses,
+composed scopes and CLI/view behavior. This supports a runnable experimental
+vertical slice, not private accuracy or maturity advancement. The next
+architectural question is whether a knowledgeable operator can choose affordable
+real canonical regions and receive useful conditional evidence with these limits.
+
+Review exposed four boundaries that are now explicit in this local contract:
+canonical root identity governs union deduplication; unequal represented
+interfaces supply inventory residuals without suppressing unrelated content;
+structural metadata filtering never drops explicit black-box instance overrides;
+and saved cards are reconstructed from incidence/proofs rather than trusted as
+independent assertions. Certification, lanes, focus, meaning and full charges
+must agree with that reconstruction. These are consistency guarantees, not
+authentication of an arbitrarily rewritten source report.
+
+## Local automatic hierarchy trial
+
+The repository carries an optional example workflow that deterministically
+enumerates every affordable relative hierarchy path shared by two selected roots.
+This revises the earlier Luna-first handoff: stable hierarchy requires no agent
+ranking. Relative path equality remains supplied scope knowledge, never verified
+identity. Every window retains its independent anonymous graph, proof, report and
+abstentions while one explicit batch reuses immutable input preparation.
+
+A local Luna agent is reserved for unmatched frontier branches where rename,
+move, split or merge may have broken relative path equality. Its compact handoff
+is a reading-cost aid, not a privacy boundary; the authorized local agent may
+inspect complete sensitive inputs. Validation rejects shared paths and quiet
+controls, binds proposals to the handoff hash, and checks exact leaf charges,
+non-overlapping unions and general 1:1/1:n/n:1 structure. An agent proposal remains
+a heuristic supplied scope and never becomes correspondence evidence.
+
+The trial refuses more than its explicit total-window bound rather than ranking
+or truncating. Canonical input hashes, atomic non-overwriting output, complete
+per-window reports and an honest resource-stop receipt make one private run
+inspectable. The workflow opts into the exercised 64-leaf/96-net/16-counterpart/
+200-retained/100-presentation values without changing package defaults. Public
+tests cover both input shapes, explicit complete global-net scope, optional
+parameter omission, zero-proposal agent abstention, deterministic and unmatched
+selection, mutation and overwrite guards, a real mixed batch, and resource
+exhaustion without inferred quiet results. Compact summaries retain supplied
+paths for local navigation. Private usefulness and naming stability remain
+unmeasured; prototype maturity is unchanged.
+
+The first public usability run exposed that a technically valid handoff can fail
+at its human-agent seam: Luna searched for a top-level frontier array and the
+generated commands relied on an inherited development `PYTHONPATH`. The task now
+names all four side-qualified arrays, reports and requires confirmation of their
+counts before abstention, and emits commands bound only to the two discovered
+local package roots. Tests execute those commands with the ambient Python path
+removed.
+
+## Experimental budget separation
+
+The opt-in operator-scoped prototype now distinguishes solver leaf/net/counterpart
+admission, retained evidence support and charged presentation. Old defaults remain
+unchanged. A larger analyzed window may have a certified proof and no affordable
+card; those outcomes are reported separately. Complete candidate classes and nets
+remain intact, and all admission failures are visible. Raw catalogs/exterior
+incidence remain audit context, with separate byte/resource limits.
+
+This challenges the earlier coupling in which a presentation ceiling prevented
+backend analysis. It does not establish that larger regions yield useful operator
+locations: overlap grouping, complete support charging and private correspondence
+remain separate questions. Phase/model/RSS diagnostics make that hypothesis
+inspectable. Exact objectives, proof prerequisites and unresolved identity remain
+unchanged; new capacity is not a new correspondence claim.
+
+## Explicit sequential batch preparation
+
+Repeated supplied-window scans exposed a boundary mismatch: immutable full-input
+identity and full-top exterior incidence were being reconstructed for every
+window even though their inputs, tops, scope and options were fixed. An explicit
+batch API now owns that reuse inside one bounded worker. It has no process-global
+state. Each window still constructs a fresh selected view, anonymous graph,
+admission record, evidence lanes and exact proof, and yields an ordinary saved
+report. The batch key includes canonical content identities, tops, scopes and all
+options, so a changed basis starts new preparation rather than inheriting stale
+incidence. This tests whether deterministic hierarchy scans can pay immutable
+preparation once without weakening the local proof contract; representative
+workplace performance remains an evidence question.

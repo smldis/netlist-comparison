@@ -1,3 +1,3 @@
 include AGENTS.md ONTOLOME.md unit.toml
 recursive-include docs *.md
-recursive-include examples *.sp *.py *.json
+recursive-include examples *.sp *.py *.json *.md

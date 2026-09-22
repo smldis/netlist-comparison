@@ -44,6 +44,14 @@ def _validate(report):
         raise ValueError("expected a full comparison report, not a derived view")
     if report.get("schema_version") != 1:
         raise ValueError("unsupported comparison report schema_version; expected 1")
+    if "operator_scoped" in report:
+        from .operator_scoped import validate_saved_extension
+        validate_saved_extension(report["operator_scoped"])
+        extension=report['operator_scoped']
+        if report.get('representative_pair_ids') or report.get('pair_options'):
+            raise ValueError('local report cannot contain global representative correspondence')
+        if extension['windows'] and report.get('options',{}).get('operator_parameters') != extension['parameter_detail_enabled']:
+            raise ValueError('local parameter lane does not match saved options')
     for key in ("input_identity", "scope", "options", "a", "b", "pair_options", "representative_pair_ids", "connectivity", "hierarchy", "groups"):
         if key not in report:
             raise ValueError(f"invalid comparison report: missing {key}")
@@ -112,7 +120,7 @@ def _group_resolver(report, side, depth):
 
 
 def project_saved_report(report, *, source_path=None, source_sha256=None,
-                         under_a=(), under_b=(), categories=("raw", "wiring", "unpaired"),
+                         under_a=(), under_b=(), categories=("raw", "wiring", "unpaired", "local"),
                          parameter=None, group_depth=None, omit_parameters=False):
     """Project a full JSON-compatible report without mutating or rematching it.
 
@@ -130,8 +138,8 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
         raise ValueError("categories and hierarchy selectors must be lists or tuples")
     categories = tuple(categories)
     if (not categories or any(not isinstance(c, str) for c in categories)
-            or len(set(categories)) != len(categories) or set(categories) - {"raw", "wiring", "unpaired"}):
-        raise ValueError("categories must be distinct choices from raw, wiring, unpaired")
+            or len(set(categories)) != len(categories) or set(categories) - {"raw", "wiring", "unpaired", "local"}):
+        raise ValueError("categories must be distinct choices from raw, wiring, unpaired, local")
     if parameter is not None and (not isinstance(parameter, str) or not parameter or "raw" not in categories):
         raise ValueError("--parameter requires the raw category and a parameter name")
     if group_depth is not None and (type(group_depth) is not int or group_depth < 0):
@@ -139,6 +147,7 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
     roots = {"a": tuple(_segments(p) for p in under_a), "b": tuple(_segments(p) for p in under_b)}
     for side in ("a", "b"):
         available = [row["id"] for row in report[side]["objects"]] + [row["path"] for row in report[side]["occurrences"]]
+        available += report.get('operator_scoped',{}).get('charged_paths',{}).get(side,[])
         known = {_segments(p) for p in available}
         for supplied, root in zip(under_a if side == "a" else under_b, roots[side]):
             if root not in known:
@@ -151,6 +160,9 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
             return True
         return bool((a and _under(a, roots["a"])) or (b and _under(b, roots["b"])))
 
+    all_local=report.get('operator_scoped',{}).get('cards',[])
+    local=[c for c in all_local if (not omit_parameters or c['lane']!='parameter_detail') and
+           (not path_filter or any(_under(p,roots[s]) for s in ('a','b') for p in c['charged_paths'][s]))] if 'local' in categories else []
     scoped_pairs = [p for p in pairs if selected(p["a"], p["b"])]
     scoped_ids = {p["id"] for p in scoped_pairs}
     field = "parameters." + parameter.casefold() if parameter else None
@@ -203,13 +215,14 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
                   for a, b in keys]
     totals = {"raw": len(all_raw), "wiring": len(all_wiring),
               "unpaired": sum(map(len, all_unpaired.values()))}
-    shown = {"raw": len(raw), "wiring": len(wiring), "unpaired": sum(map(len, unpaired.values()))}
+    totals["local"]=len(all_local)
+    shown = {"local":len(local), "raw": len(raw), "wiring": len(wiring), "unpaired": sum(map(len, unpaired.values()))}
     raw_fields_total = sum(len(p["raw_differences"]) for p in pairs)
     raw_fields_shown = sum(len(p["raw_differences"]) for p in raw)
     # These structures carry coupling, alternatives, parameter context, and scope.
     # Keeping them whole is intentional even when a finding selector is narrow.
     context_keys = ("groups", "inspection_regions", "partial_alignment", "reference_proposals",
-                    "candidate_basis", "representative_selection", "boundary", "population_evidence")
+                    "candidate_basis", "representative_selection", "boundary", "population_evidence", "operator_scoped")
     context = {key: report[key] for key in context_keys if key in report}
     context["pair_options"] = report["pair_options"]
     context["representative_pair_ids"] = report["representative_pair_ids"]
@@ -227,7 +240,7 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
                     "omit_parameters": omit_parameters},
         "counts": {"representative_pairs_total": len(pairs), "representative_pairs_in_path_scope": len(scoped_pairs),
                    "by_category": {key: {"total": totals[key], "shown": shown[key], "hidden": totals[key] - shown[key]}
-                                   for key in ("raw", "wiring", "unpaired")},
+                                   for key in ("raw", "wiring", "unpaired", "local")},
                    "population_groups": {"total": len(report.get("population_evidence", {}).get("groups", [])),
                                          "shown": len(report.get("population_evidence", {}).get("groups", [])) if "unpaired" in categories else 0,
                                          "hidden": 0 if "unpaired" in categories else len(report.get("population_evidence", {}).get("groups", [])),
@@ -238,7 +251,7 @@ def project_saved_report(report, *, source_path=None, source_sha256=None,
                        _parameter_detail(d['field']) for p in scoped_pairs for d in p['raw_differences']) if omit_parameters and 'raw' in categories else 0,
                    "endpoint_witnesses": {"total": len(all_witnesses), "shown": len(witnesses),
                                           "hidden": len(all_witnesses) - len(witnesses)}},
-        "findings": {"raw_pairs": raw, "wiring_partition_rows": wiring, "unpaired_objects": unpaired,
+        "findings": {"local_cards":local, "raw_pairs": raw, "wiring_partition_rows": wiring, "unpaired_objects": unpaired,
                      "endpoint_witnesses": witnesses,
                      "population_groups": report.get("population_evidence", {}).get("groups", []) if "unpaired" in categories else [],
                      "omission_search": report.get("partial_alignment", {}).get("omission_search") if "unpaired" in categories else None,

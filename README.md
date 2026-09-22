@@ -410,3 +410,140 @@ JSON retains `partial_alignment.swap_search` and reconstructible witnesses.
 even with subtree filters; leaf/wiring selections remain separately scoped.
 Names and raw values do not rank swap search; existing certified presentation
 may subsequently choose an incidence-preserving representative.
+
+## Experimental operator-supplied comparison windows
+
+When you already know which blocks correspond, opt into `operator_scoped` to
+inspect their represented content and connectivity. This is a local inspection
+contract: your paths supply the correspondence, and never count as discovered
+identity. Existing matching defaults are unchanged.
+
+```sh
+netlist-compare full.canonical --format canonical --top TOP \
+  --path-a TOP/XOLD --path-b TOP/XNEW \
+  --black-box-missing --matching-mode operator_scoped \
+  --operator-seconds 180 --operator-memory-mib 3072 --output local.json --text
+
+netlist-compare before.canonical after.canonical --format canonical \
+  --top-a TOP --top-b TOP --path-a TOP/XOLD --path-b TOP/XNEW \
+  --black-box-missing --matching-mode operator_scoped --output local.json --text
+
+netlist-compare view local.json --category local --omit-parameters --text
+```
+
+For two files, omit paths to compare their entire selected tops. Repeat per-side
+`--path-a`/`--path-b` flags to explicitly compose split/merged regions. All
+selected leaves and scope addresses count against the budget; filtering a saved
+card does not discard its opposite-side context or support charges.
+
+Cards show conditional architecture, literal parameter populations and separate
+exterior context. They do not claim unique identity, recovered edits, unchanged
+circuit behavior or electrical equivalence. The primary matcher cannot see leaf
+names, hierarchy paths or net spellings. Cell labels, named terminal roles and
+positional `@N` roles retain their different literal meanings. Unknown cell-label
+semantics cannot distinguish replacement from relabeling. Unequal black-box
+interface widths remain literal inventory evidence with no cross-width pairing;
+unrelated supported content can still be analyzed. Case-folding terminal-role collisions are rejected. Explicit black-box instance
+overrides are retained, including names such as `model`, `source_type` and `raw`.
+`--omit-parameters` hides the parameter-detail lane, retaining its facts in JSON.
+
+The admitted region has at most 64 leaves and 64 nets per side, 16 compatible
+counterparts per endpoint, 12 cards and 100 distinct side-qualified member,
+scope and support paths. Oversized/opaque/incomplete regions are visibly
+uncertified. Local terminal evidence requires certified weighted, maximum-
+coverage `K` and `K-1` results. Literal inventory facts may still be available
+when correspondence cannot be certified. Local hypotheses stay in
+`operator_scoped.windows`; global `representative_pair_ids` remain empty.
+
+Deterministic scans over many windows can keep preparation local and explicit:
+
+```python
+from netlist_comparison import compare_operator_scoped_batch, Options
+
+batch = compare_operator_scoped_batch(
+    before, after, top_a="TOP", top_b="TOP",
+    windows=[
+        {"paths_a": ("TOP/X1",), "paths_b": ("TOP/X1",)},
+        {"paths_a": ("TOP/X2",), "paths_b": ("TOP/X2",)},
+    ],
+    options=Options(matching_mode="operator_scoped"),
+)
+```
+
+Inputs, tops, scopes and options are fixed for one batch. It reuses their
+content identities and the complete full-top exterior-incidence index inside
+one bounded worker. Every window still receives a new selection, anonymous
+graph, proof and saved report. Start another batch when any fixed input changes;
+there is no process-global cache. Batch transfer retains the ordinary 32 MiB
+per-window serialization allowance with a 512 MiB aggregate ceiling and reports
+the actual byte count. The single-window API and CLI are unchanged.
+
+Execution currently requires Linux/POSIX fork and `/proc`. The configurable
+worker deadline defaults to 60 seconds, RSS watchdog to 3072 MiB, and individual
+solver attempts to at most 10 seconds. The parent samples worker RSS every
+20 ms and kills an over-budget worker: this is a sampled watchdog, not an
+allocation-time memory ceiling. CLI input loading and worker result encoding
+are inside the deadline; final stdout/disk serialization and writes are outside.
+For the Python API, caller-side canonical parsing is also outside the deadline.
+Timeout yields an incomplete report, never certified quiet. The worker uses one
+CPU; the solver receives one thread. Multithreaded embedding of the fork-based
+API has not been validated.
+
+See [the detailed local contract](docs/index.md#operator-supplied-local-windows)
+for the objective, certificates, API, output limits and remaining gaps.
+
+The optional [local automatic hierarchy trial](examples/luna_hierarchy_workflow.md)
+enumerates every shared relative hierarchy path within its leaf cap, then uses one
+explicit batch for those deterministic windows and optional validated Luna
+rename/move/split/merge proposals from unmatched branches. It supports two
+revisions and two instances in one file, writes a complete report per window, and
+retains hashes, abstentions and the batch resource receipt. Sensitive canonical
+inputs may be inspected by the authorized local agent. The manifest reduces
+reading cost rather than enforcing privacy, and neither relative path equality,
+an agent proposal, nor conditional comparison evidence claims correspondence.
+Use `prepare --globals-complete` when ground `0` is the complete global-net set;
+repeat `--global-net NAME` for any others. `prepare --omit-parameters` selects
+the architecture-first variant, and Luna may validly return no proposals.
+
+### Separate experimental computation and inspection budgets
+
+The old defaults remain 64 leaves, 64 nets, 16 complete counterparts, 100 retained
+context paths, 100 displayed charged paths and 12 cards. The opt-in scaling controls
+separate these limits; they do not prune a larger candidate class or drop nets:
+
+```sh
+netlist-compare before.canonical after.canonical --format canonical \
+  --top-a TOP --top-b TOP --path-a TOP/XBLOCK --path-b TOP/XBLOCK \
+  --black-box-missing --matching-mode operator_scoped \
+  --operator-leaves 64 --operator-nets 96 --operator-counterparts 16 \
+  --operator-retained-paths 200 --operator-presentation-paths 100 \
+  --operator-cards 12 --operator-seconds 60 --operator-query-seconds 5 \
+  --operator-memory-mib 3072 --output local.json --text
+```
+
+The Python `Options` fields are `operator_max_leaves`, `operator_max_nets`,
+`operator_max_counterparts`, `operator_retained_paths`,
+`operator_presentation_paths`, `operator_max_cards`, and `operator_query_seconds`.
+Presentation paths cannot exceed retained paths. The retained limit bounds the
+full member/scope support needed to analyze an internal window; exterior evidence
+uses its full member/scope/outside-witness charge. Raw source catalogs and complete
+outside-endpoint incidence remain audit data and are not truncated to this limit.
+Their serialized byte/resource bounds still apply. Retention is not a cap on every
+path string appearing anywhere in JSON.
+
+A larger window may certify yet expose no card in the strict presentation view.
+The result retains evidence, full support charges, every admission failure,
+proof/coverage status, and explicit lane omissions; it never reports hidden
+support as free. Increasing the display cap explicitly pays that larger inspection
+cost. A saved filter does not recompute matching or erase charges. Schema-2 local
+extensions retain the declared budgets and reconstruct their consistency; the
+reader continues to accept old schema-1 local extensions with fixed original caps.
+
+Phase timers distinguish loading, selection, catalogs, exterior incidence, admission,
+proofs and presentation. Native attempts report model dimensions and assembly/solver
+time. The sampled sum of parent and worker RSS high-water measurements is a
+conservative diagnostic (shared memory may be counted twice), not a new aggregate
+memory enforcement promise. The worker deadline/RSS watchdog remains authoritative.
+No source/result cache, candidate-ranking change, new lower bound or heuristic
+localization is introduced by these controls. Larger capacity has no general
+performance or private-accuracy guarantee.
