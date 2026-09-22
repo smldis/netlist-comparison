@@ -768,13 +768,13 @@ serialized size and is bounded by both 32 MiB per requested window and a 512 MiB
 aggregate ceiling.
 
 For a local sensitive-data trial, the dependency-free
-[`examples/luna_hierarchy_trial.py`](../examples/luna_hierarchy_trial.py)
+[`examples/luna_hierarchy_trial.py`](https://github.com/smldis/netlist-comparison/blob/main/examples/luna_hierarchy_trial.py)
 workflow prepares every bounded shared relative hierarchy path, plus a separate
 unmatched-branch handoff for optional Luna rename, move, split or merge
 proposals. Its single `run` command validates the prepared artifacts and any
 proposal file, invokes one ordered batch, and saves the complete per-window
 reports with a compact hash-bound summary and receipt. The
-[`workflow guide`](../examples/luna_hierarchy_workflow.md) covers two revisions,
+[`workflow guide`](https://github.com/smldis/netlist-comparison/blob/main/examples/luna_hierarchy_workflow.md) covers two revisions,
 two selected instances in one file, local-agent handoff, limits and evidence
 semantics. Preparation preserves the comparator input-scope contract:
 `--globals-complete` asserts that implicit ground `0` plus repeatable
