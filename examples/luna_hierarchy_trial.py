@@ -351,11 +351,47 @@ After writing proposals, run:
 ```
 
 `run` executes one ordered batch: deterministic windows first, then validated
-Luna proposals. Inspect `trial-summary.json` and only the full result files needed
-for interpretation. Write `luna-assessment.md` with exact statuses, card lanes,
-useful locations, abstentions, noise, and blind spots. Say "no selected cards"
-rather than quiet or unchanged. Never let a proposal label override comparator
-evidence.
+Luna proposals. Inspect `trial-summary.json` and a bounded selection of full
+results. Write `luna-assessment.md` for a schematic reader. Its first page
+should contain at most eight short findings with an A location, B location,
+what differs in ordinary words, and what to inspect on the schematics. Put
+result IDs, exact statuses, evidence kinds and charged support next to each
+finding or in a compact evidence note. Keep the opening explanation to one or
+two plain sentences per finding; put internal field names, net indices and proof
+details after it. Before finalizing, check every direction, count and terminal
+role in the prose against the cited result; in particular, do not call A
+smaller when A has more leaves or summarize one displayed mismatch as the
+whole certified residual. Keep full paths in this local file; do not export
+them. Lead with supported differences; place no-card comparisons,
+unmatched hypotheses and abstentions in a separate short section, not the
+prioritized findings. Distinguish comparator-backed observations from your
+tentative interpretation and state what remains unknown.
+
+Look for represented additions and removals, cell-class population changes,
+possible block splits/merges, rewiring, and pin/interface differences. Inspect
+at least one card of each evidence kind present among the card-bearing windows,
+including terminal residuals when present, before deciding what deserves the
+first page. A terminal residual may support a count of unavoidable attachment
+disagreements and implicated terminal roles even when exact device identity is
+ambiguous; explain that limit in ordinary words. For a similar-looking A/B
+block, compare available formal pins, named terminal roles
+and represented attachments when the inputs and result evidence support it.
+Describe a specific differing pin/role only when you can trace both sides;
+do not infer pin names from positional `@N` tokens or call different raw net
+labels a rewire. If a result supports only an interface-count or cell-inventory
+residual, say that rather than inventing a pin-level explanation. An A-only or
+B-only hierarchy branch is a candidate removal/addition, rename or move until
+evidence distinguishes them. A population surplus is not proof of historical
+addition/removal. Keep unsupported hypotheses in a separate section.
+
+If parent and child windows appear to show the same issue, lead with the most
+specific useful location and mention the other result IDs; retain independent
+child findings and abstentions. Include a brief count of certified, abstained,
+card-bearing and unmatched windows, plus the most important blind spots. Keep
+the first page concise enough for an operator to decide what to inspect next.
+Say "no selected cards" rather than quiet or unchanged. Never let a proposal label
+override comparator evidence or treat certification inside a supplied window
+as proof that the A/B scopes correspond.
 """
 
 

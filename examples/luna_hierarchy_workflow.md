@@ -79,7 +79,17 @@ The parameter choice is recorded and reused by `run`.
 
 Start a Luna medium agent in the authorized environment, give it the trial
 directory, and ask it to follow `LUNA_TASK.md`. It may inspect the complete
-canonical inputs locally. It writes `proposals.json` and `luna-report.md`.
+canonical inputs locally. It writes `proposals.json`, `luna-report.md`, and,
+after the batch, `luna-assessment.md`. Its short first page leads with readable
+schematic locations and supported differences, including represented
+additions/removals, cell populations, and pin/interface changes when available.
+It separates those observations from tentative rename, move, split or merge
+interpretations. Unmatched A-only/B-only branches are candidates, not proof of
+historical removal/addition; positional `@N` terminals are not named pins.
+No-card proposals and abstentions belong after supported findings. The agent
+checks each evidence kind present in the card-bearing set before choosing its
+first-page examples; a terminal residual can identify affected terminal roles
+without proving which individual device was edited.
 The generated task names the exact `sides.a.*` and `sides.b.*` frontier and
 eligible-path arrays, records their counts, and requires Luna to confirm both
 sides before returning no proposals. Its literal validate/run commands set a

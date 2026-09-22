@@ -504,6 +504,15 @@ counts before abstention, and emits commands bound only to the two discovered
 local package roots. Tests execute those commands with the ambient Python path
 removed.
 
+The workplace trial exposed a second seam: complete JSON and a flat window
+summary can be hard for an engineer to read even when local cards exist. The
+optional local agent task now asks for a schematic-facing assessment of supported
+inventory, pin/interface and connectivity evidence, with candidate additions,
+removals and hierarchy relations kept explicitly tentative. This is a human
+interpretation layer over saved reports, not a new comparator proof or a claim
+that generated prose is authoritative. The unresolved question is whether that
+assessment actually helps the operator find and understand private changes.
+
 ## Experimental budget separation
 
 The opt-in operator-scoped prototype now distinguishes solver leaf/net/counterpart
