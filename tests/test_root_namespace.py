@@ -10,7 +10,7 @@ from netlist_comparison.cli import main
 @pytest.mark.parametrize('mode', ['fixed', 'regional'])
 def test_file_root_is_not_an_available_missing_cell_implementation(mode):
     data = from_text('X1 out TOP gain=1\nR1 out 0 1k\n')
-    saved = from_canonical_text(data.render())
+    saved = from_canonical_text(data.render(include_diagnostics=True))
     assert data == saved
     r = compare(data, saved, top_a='TOP', top_b='TOP', options=Options(
         matching_mode=mode, black_box_missing=True))
