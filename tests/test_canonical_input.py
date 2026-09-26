@@ -18,7 +18,8 @@ def test_extractor_to_comparator_with_named_external_cells(tmp_path, capsys):
                           f'XM O I 0 0 nmos_lvt W={width}\nXR O 0 res_cell R=1k\n.ends\n'
                           'Xamp input output AMP SCALE=3\n')
         target = tmp_path / f'{side}.canonical'
-        assert extract([str(source), '--external-subcircuits', str(interfaces), '--output', str(target)]) == 0
+        assert extract([str(source), '--external-subcircuits', str(interfaces),
+                        '--include-diagnostics', '--output', str(target)]) == 0
         source.unlink()
         artifacts.append(str(target))
     interfaces.unlink()

@@ -322,7 +322,7 @@ maturity change or a new claim about matching accuracy.
 User experience exposed that a direct Python dependency was insufficient for a
 reusable extraction workflow. `--format canonical` now delegates custom-table
 loading to the owning canonical reader. Extraction configuration is not duplicated
-here; saved diagnostics, defaults and explicit external interfaces enter the same
+here; saved diagnostics when present, defaults and explicit external interfaces enter the same
 comparison API used by SPICE inputs. The canonical reader checks artifact structure;
 comparison still decides what to assume about unavailable internals. This changes
 the input boundary, not regional admission limits or prototype maturity.

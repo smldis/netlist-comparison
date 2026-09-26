@@ -10,7 +10,8 @@ This assumes unchanged hidden implementations, stable cell references and stable
 terminal order. It compares connections and raw instance overrides without the
 library definitions. Positional terminals are labelled `@1`, `@2`, etc.; these
 are positions, not inferred pin names. Mismatched interfaces stay unresolved.
-Internals remain unavailable and original extraction diagnostics remain visible.
+Internals remain unavailable. Original extraction diagnostics remain visible
+when consuming SPICE input directly, or when saved in a canonical artifact.
 The default still leaves undefined calls opaque. See the guide for scope/limits.
 
 A Python prototype that proposes counterparts between canonical analog netlists
@@ -124,8 +125,10 @@ Without a mapping, canonical preserves positional terminals. Both artifacts use
 SPICE Canonical's custom table syntax, not JSON. The comparator delegates loading
 to `spice_canonical.canonical_netlist.from_canonical_file`; original SPICE files
 and libraries need not be available. `--inspect` and two-instance comparison also
-accept `--format canonical`. Extraction warnings, defaults, overrides and explicit
-black-box interfaces survive. This requires the canonical-text reader revision of
+accept `--format canonical`. Defaults, overrides and explicit black-box
+interfaces survive. Extraction diagnostics survive only when the canonical
+export used `--include-diagnostics`; CLI warnings are a separate stderr stream.
+This requires the canonical-text reader revision of
 `spice-canonical`; the earlier pinned BJT-only revision does not provide it.
 The matching algorithms and their regional admission limits are unchanged.
 
